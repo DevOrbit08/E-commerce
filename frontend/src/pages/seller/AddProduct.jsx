@@ -21,7 +21,6 @@ const AddProduct = () => {
   const [sku, setSku] = useState('');
   const [unitValue, setUnitValue] = useState('1');
   const [unitType, setUnitType] = useState('kg');
-  const [mrp, setMrp] = useState('');
   const [price, setPrice] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
   const [gstRate, setGstRate] = useState('5%');
@@ -45,6 +44,11 @@ const AddProduct = () => {
     event.preventDefault();
 
     try {
+      if (uploadedCount < 1) {
+        alert('Please upload at least one product image before publishing.');
+        return;
+      }
+
       if (!name || !category || !price || !offerPrice) {
         alert('Please fill required fields');
         return;
@@ -56,7 +60,7 @@ const AddProduct = () => {
         description: [description || ''],
         price: Number(price),
         offerPrice: Number(offerPrice),
-        mrp: Number(mrp || 0),
+        mrp: Number(price || 0),
         category,
         brand,
         sku,
@@ -87,7 +91,6 @@ const AddProduct = () => {
         setSku('');
         setUnitValue('1');
         setUnitType('kg');
-        setMrp('');
         setPrice('');
         setOfferPrice('');
         setGstRate('5%');
@@ -127,6 +130,10 @@ const AddProduct = () => {
                   {uploadedCount} / 5
                 </span>
               </div>
+
+              <p className={`mb-4 text-sm ${uploadedCount >= 1 ? 'text-[#2ab673]' : 'text-[#f1683a]'}`}>
+                {uploadedCount >= 1 ? 'Image uploaded. Ready to publish.' : 'Minimum 1 image is required before publishing.'}
+              </p>
 
               <div className="grid gap-5 sm:grid-cols-[190px_1fr]">
                 <label
@@ -334,17 +341,16 @@ const AddProduct = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="mrp" className="mb-2 block text-base font-medium text-[#2a2724]">
+                  <label htmlFor="price" className="mb-2 block text-base font-medium text-[#2a2724]">
                     MRP (incl. of all taxes) <span className="text-[#f1683a]">*</span>
                   </label>
                   <div className="flex items-center overflow-hidden rounded-xl border border-[#d9cfc4] bg-white">
                     <span className="px-3 text-[#7d756f]">₹</span>
                     <input
-                      id="mrp"
+                      id="price"
                       type="number"
-                      value={mrp}
-                      onChange={(e) => setMrp(e.target.value)}
-                     
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
                       className="w-full border-0 bg-transparent px-2 py-3 text-base text-[#2a2724] outline-none"
                       required
                     />

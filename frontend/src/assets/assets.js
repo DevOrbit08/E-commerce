@@ -13,11 +13,7 @@ import order_icon from "./order_icon.svg";
 import upload_area from "./upload_area.png";
 import profile_icon from "./profile_icon.png";
 import menu_icon from "./menu_icon.svg";
-import delivery_truck_icon from "./delivery_truck_icon.svg";
-import leaf_icon from "./leaf_icon.svg";
-import coin_icon from "./coin_icon.svg";
 import box_icon from "./box_icon.svg";
-import trust_icon from "./trust_icon.svg";
 import black_arrow_icon from "./black_arrow_icon.svg";
 import white_arrow_icon from "./white_arrow_icon.svg";
 import main_banner_bg from "./main_banner_bg.png";
@@ -101,10 +97,6 @@ export const assets = {
   upload_area,
   profile_icon,
   menu_icon,
-  delivery_truck_icon,
-  leaf_icon,
-  coin_icon,
-  trust_icon,
   black_arrow_icon,
   white_arrow_icon,
   main_banner_bg,
@@ -189,29 +181,6 @@ export const footerLinks = [
       { text: "Facebook", url: "#" },
       { text: "YouTube", url: "#" },
     ],
-  },
-];
-
-export const features = [
-  {
-    icon: delivery_truck_icon,
-    title: "Fastest Delivery",
-    description: "Groceries delivered in under 30 minutes.",
-  },
-  {
-    icon: leaf_icon,
-    title: "Freshness Guaranteed",
-    description: "Fresh produce straight from the source.",
-  },
-  {
-    icon: coin_icon,
-    title: "Affordable Prices",
-    description: "Quality groceries at unbeatable prices.",
-  },
-  {
-    icon: trust_icon,
-    title: "Trusted by Thousands",
-    description: "Loved by 10,000+ happy customers.",
   },
 ];
 

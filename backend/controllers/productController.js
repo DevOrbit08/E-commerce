@@ -5,8 +5,13 @@ import path from 'path';
 // Add Product : /api/product/add
 export const addProduct = async (req, res) => {
     try {
-        let productData = JSON.parse(req.body.productData);
+        const productData = JSON.parse(req.body.productData);
         const images = req.files || [];
+
+        if (!images || images.length === 0) {
+            return res.status(400).json({ success: false, message: 'Please upload at least one product image before publishing.' });
+        }
+
         let imagesUrl = [];
 
         // If Cloudinary configured, upload; otherwise use local uploads URLs
@@ -19,10 +24,6 @@ export const addProduct = async (req, res) => {
             // map to statically served uploads (server must serve /uploads)
             const base = process.env.API_URL || `http://localhost:${process.env.PORT || 8000}`;
             imagesUrl = images.map(item => `${base}/uploads/${path.basename(item.path)}`);
-            // if no files uploaded, keep a placeholder
-            if(imagesUrl.length === 0){
-              imagesUrl = ['https://via.placeholder.com/300x300?text=Product'];
-            }
         }
 
         const created = await Product.create({...productData, images: imagesUrl});
