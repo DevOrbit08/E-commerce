@@ -1,4 +1,4 @@
-# 🛒 GreenCart – Online Grocery Store
+# 🛒 The Kirana – Online Grocery Store
 
 GreenCart is a **full-stack MERN (MongoDB, Express, React, Node.js)** grocery app. Customers can browse products, manage a shopping cart, save addresses, and place orders via **Cash on Delivery (COD)** or **Stripe Online Payments**. Sellers/Admins can manage products and view all orders.
 
