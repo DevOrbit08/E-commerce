@@ -6,13 +6,15 @@ import path from 'path';
 export const addProduct = async (req, res) => {
     try {
         const productData = JSON.parse(req.body.productData);
-        const images = req.files || [];
+        const files = req.files || [];
+        const images = files.filter((file) => file.fieldname === 'images');
 
-        if (!images || images.length === 0) {
+        if (images.length === 0 && !files.some((file) => file.fieldname.startsWith('variantImage_'))) {
             return res.status(400).json({ success: false, message: 'Please upload at least one product image before publishing.' });
         }
 
         let imagesUrl = [];
+        const variantFiles = files.filter((file) => file.fieldname.startsWith('variantImage_'));
 
         // If Cloudinary configured, upload; otherwise use local uploads URLs
         if (process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_SECRET) {
@@ -26,7 +28,29 @@ export const addProduct = async (req, res) => {
             imagesUrl = images.map(item => `${base}/uploads/${path.basename(item.path)}`);
         }
 
-        const created = await Product.create({...productData, images: imagesUrl});
+        const variantImageUrls = {};
+        if (process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_SECRET) {
+            await Promise.all(variantFiles.map(async (item) => {
+                const result = await cloudinary.uploader.upload(item.path, { resource_type: 'image' });
+                variantImageUrls[item.fieldname] = result.secure_url;
+            }));
+        } else {
+            const base = process.env.API_URL || `http://localhost:${process.env.PORT || 8000}`;
+            variantFiles.forEach((item) => {
+                variantImageUrls[item.fieldname] = `${base}/uploads/${path.basename(item.path)}`;
+            });
+        }
+        if (imagesUrl.length === 0) imagesUrl = Object.values(variantImageUrls);
+
+        const variants = Array.isArray(productData.variants)
+            ? productData.variants.map((variant) => ({
+                ...variant,
+                image: variant.imageField ? (variantImageUrls[variant.imageField] || '') : '',
+            }))
+            : productData.variants;
+        delete productData.variants;
+
+        const created = await Product.create({ ...productData, variants, images: imagesUrl });
         res.json({success: true, message: "Product Added", product: created});
     } catch (error) {
         console.log(error.message);
@@ -60,16 +84,25 @@ export const productById = async (req, res) => {
 // Change Product inStock : /api/product/stock
 export const changeStock = async (req, res) => {
     try {
-        const { id, quantity } = req.body;
+        const { id, quantity, variantUnit } = req.body;
         if (quantity < 0) {
             return res.json({ success: false, message: "Quantity cannot be negative" });
         }
 
-        const updatedProduct = await Product.findByIdAndUpdate(
-            id,
-            { quantity, inStock: quantity > 0 },
-            { new: true }
-        );
+        const product = await Product.findById(id);
+        if (!product) return res.json({ success: false, message: "Product not found" });
+
+        if (variantUnit && Array.isArray(product.variants) && product.variants.length) {
+            const variant = product.variants.find((item) => item.unit === variantUnit);
+            if (!variant) return res.json({ success: false, message: "Product variant not found" });
+            variant.quantity = quantity;
+            variant.inStock = quantity > 0;
+            product.inStock = product.variants.some((item) => item.inStock);
+            const updatedProduct = await product.save();
+            return res.json({ success: true, message: "Variant stock updated", product: updatedProduct });
+        }
+
+        const updatedProduct = await Product.findByIdAndUpdate(id, { quantity, inStock: quantity > 0 }, { new: true });
 
         res.json({ success: true, message: "Stock Updated", product: updatedProduct });
     } catch (error) {
@@ -81,7 +114,7 @@ export const changeStock = async (req, res) => {
 // Update product fields (name, description (array), price, offerPrice, category)
 export const updateProduct = async (req, res) => {
     try {
-        const { id, name, description, price, offerPrice, category } = req.body;
+        const { id, name, description, price, offerPrice, category, brand, weight, unit } = req.body;
         if(!id) return res.json({ success: false, message: 'Product id required' });
 
         const update = {};
@@ -89,7 +122,10 @@ export const updateProduct = async (req, res) => {
         if(description) update.description = Array.isArray(description) ? description : (description ? [description] : []);
         if(price !== undefined) update.price = Number(price);
         if(offerPrice !== undefined) update.offerPrice = Number(offerPrice);
-        if(category) update.category = category;
+        if(category) update.category = Array.isArray(category) ? category : [category];
+        if(brand !== undefined) update.brand = brand;
+        if(weight !== undefined) update.weight = Number(weight);
+        if(unit !== undefined) update.unit = unit;
 
         const updatedProduct = await Product.findByIdAndUpdate(id, update, { new: true });
         res.json({ success: true, message: 'Product updated', product: updatedProduct });

@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { assets } from "../../assets/assets";
 import { useAppContext } from "../../context/AppContext";
+import { Users, Truck } from "lucide-react";
 
 const SellerLayout = () => {
 
@@ -12,6 +13,8 @@ const SellerLayout = () => {
         { name: "Add Product", path: "/seller", icon: assets.add_icon },
         { name: "Product List", path: "/seller/product-list", icon: assets.product_list_icon },
         { name: "Orders", path: "/seller/orders", icon: assets.order_icon },
+        { name: "Customers", path: "/seller/customers", icon: null, component: Users },
+        { name: "Delivery Partner", path: "/seller/delivery-partners", icon: null, component: Truck },
     ];
 
     const logout = async ()=>{
@@ -40,7 +43,7 @@ const SellerLayout = () => {
                             }`
                         }
                     >
-                        <img src={item.icon} alt="" className="w-7 h-7"/>
+                        {item.icon ? <img src={item.icon} alt="" className="w-7 h-7"/> : <item.component size={27} />}
                         <p className="md:block hidden text-center">{item.name}</p>
                     </NavLink>
                 ))}

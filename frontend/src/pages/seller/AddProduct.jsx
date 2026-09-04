@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { assets, categories } from '../../assets/assets';
+import { PRODUCT_CATEGORIES } from '../../constants/productCategories';
+import CategoryMultiSelect from '../../components/CategoryMultiSelect';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-const UNIT_OPTIONS = ['kg', 'g', 'l', 'ml', 'pcs'];
+const UNIT_OPTIONS = ['kg', 'g', 'L', 'ml', 'pcs'];
 
 const QUALITY_TIPS = [
   'Use clear, front-facing images',
@@ -11,12 +13,55 @@ const QUALITY_TIPS = [
   'Keep pricing competitive',
 ];
 
+const removeWhiteBackground = (file) => new Promise((resolve, reject) => {
+  const image = new Image();
+  const objectUrl = URL.createObjectURL(file);
+
+  image.onload = () => {
+    URL.revokeObjectURL(objectUrl);
+    const canvas = document.createElement('canvas');
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      reject(new Error('Unable to process product image'));
+      return;
+    }
+
+    context.drawImage(image, 0, 0);
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+
+    for (let index = 0; index < pixels.length; index += 4) {
+      if (pixels[index] > 245 && pixels[index + 1] > 245 && pixels[index + 2] > 245) {
+        pixels[index + 3] = 0;
+      }
+    }
+
+    context.putImageData(imageData, 0, 0);
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('Unable to process product image'));
+        return;
+      }
+      resolve(new File([blob], file.name.replace(/\.[^/.]+$/, '') + '.png', { type: 'image/png' }));
+    }, 'image/png');
+  };
+
+  image.onerror = () => {
+    URL.revokeObjectURL(objectUrl);
+    reject(new Error('Unable to read product image'));
+  };
+  image.src = objectUrl;
+});
+
 const AddProduct = () => {
   // files[0] is the cover image, files[1..4] are the supporting shots
   const [files, setFiles] = useState([null, null, null, null, null]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState([]);
   const [brand, setBrand] = useState('');
   const [sku, setSku] = useState('');
   const [unitValue, setUnitValue] = useState('1');
@@ -32,10 +77,19 @@ const AddProduct = () => {
     return assets.upload_area;
   }, [files]);
 
-  const setSlot = (index, file) => {
+  const setSlot = async (index, file) => {
+    if (!file) return;
+    let processedFile;
+    try {
+      processedFile = await removeWhiteBackground(file);
+    } catch (error) {
+      console.error('Product image background removal failed:', error);
+      processedFile = file;
+    }
+
     setFiles((prev) => {
       const next = [...prev];
-      next[index] = file;
+      next[index] = processedFile;
       return next;
     });
   };
@@ -49,7 +103,7 @@ const AddProduct = () => {
         return;
       }
 
-      if (!name || !category || !price || !offerPrice) {
+      if (!name || !category.length || !price || !offerPrice) {
         alert('Please fill required fields');
         return;
       }
@@ -86,7 +140,7 @@ const AddProduct = () => {
         setFiles([null, null, null, null, null]);
         setName('');
         setDescription('');
-        setCategory('');
+        setCategory([]);
         setBrand('');
         setSku('');
         setUnitValue('1');
@@ -121,9 +175,9 @@ const AddProduct = () => {
 
         <div className="grid gap-6 xl:grid-cols-[1.6fr_0.9fr]">
           {/* ---------------- LEFT COLUMN ---------------- */}
-          <div className="space-y-6">
+          <div className="contents">
             {/* Product images */}
-            <div className="rounded-[22px] border border-[#eadfd5] bg-[#fdfaf8] p-5 shadow-[0_6px_24px_rgba(25,19,15,0.03)]">
+            <div className="rounded-[22px] border border-[#eadfd5] bg-[#fdfaf8] p-5 shadow-[0_6px_24px_rgba(25,19,15,0.03)] xl:col-start-2 xl:row-start-1">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <h2 className="text-[28px] font-semibold text-[#1f1e1c]">Product images</h2>
                 <span className="rounded-full bg-[#fff1ec] px-2.5 py-1 text-sm font-medium text-[#f1683a]">
@@ -210,7 +264,7 @@ const AddProduct = () => {
             </div>
 
             {/* Product information */}
-            <div className="rounded-[22px] border border-[#eadfd5] bg-[#fdfaf8] p-5 shadow-[0_6px_24px_rgba(25,19,15,0.03)]">
+            <div className="rounded-[22px] border border-[#eadfd5] bg-[#fdfaf8] p-5 shadow-[0_6px_24px_rgba(25,19,15,0.03)] xl:col-start-1 xl:row-start-1 xl:row-span-3">
               <h2 className="mb-5 text-[28px] font-semibold text-[#1f1e1c]">Product information</h2>
 
               <div className="space-y-5">
@@ -257,19 +311,7 @@ const AddProduct = () => {
                     <label htmlFor="category" className="mb-2 block text-base font-medium text-[#2a2724]">
                       Category <span className="text-[#f1683a]">*</span>
                     </label>
-                    <select
-                      id="category"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full rounded-xl border border-[#d9cfc4] bg-white px-4 py-3 text-base text-[#2a2724] outline-none transition focus:border-[#f1683a]"
-                    >
-                      <option value="">Select category</option>
-                      {categories.map((item, index) => (
-                        <option key={index} value={item.path}>
-                          {item.text}
-                        </option>
-                      ))}
-                    </select>
+                    <CategoryMultiSelect value={category} options={PRODUCT_CATEGORIES} onChange={setCategory} />
                   </div>
 
                   <div>
@@ -299,6 +341,7 @@ const AddProduct = () => {
                         id="unit-value"
                         type="number"
                         min="0"
+                        step="any"
                         value={unitValue}
                         onChange={(e) => setUnitValue(e.target.value)}
                         className="w-full rounded-xl border border-[#d9cfc4] bg-white px-4 py-3 text-base text-[#2a2724] outline-none transition focus:border-[#f1683a]"
@@ -334,9 +377,9 @@ const AddProduct = () => {
           </div>
 
           {/* ---------------- RIGHT COLUMN ---------------- */}
-          <div className="space-y-6">
+          <div className="contents">
             {/* Pricing */}
-            <div className="rounded-[22px] border border-[#eadfd5] bg-[#fdfaf8] p-5 shadow-[0_6px_24px_rgba(25,19,15,0.03)]">
+            <div className="rounded-[22px] border border-[#eadfd5] bg-[#fdfaf8] p-5 shadow-[0_6px_24px_rgba(25,19,15,0.03)] xl:col-start-2 xl:row-start-2">
               <h2 className="mb-5 text-[28px] font-semibold text-[#1f1e1c]">Pricing</h2>
 
               <div className="space-y-4">
@@ -349,6 +392,8 @@ const AddProduct = () => {
                     <input
                       id="price"
                       type="number"
+                      min="0"
+                      step="any"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
                       className="w-full border-0 bg-transparent px-2 py-3 text-base text-[#2a2724] outline-none"
@@ -368,6 +413,8 @@ const AddProduct = () => {
                     <input
                       id="offer-price"
                       type="number"
+                      min="0"
+                      step="any"
                       value={offerPrice}
                       onChange={(e) => setOfferPrice(e.target.value)}
                       className="w-full border-0 bg-transparent px-2 py-3 text-base text-[#2a2724] outline-none"
@@ -380,7 +427,7 @@ const AddProduct = () => {
               </div>
             </div>
 
-            <div className="space-y-3 pt-2">
+            <div className="space-y-3 pt-2 xl:col-start-2 xl:row-start-3">
               <button
                 type="submit"
                 className="w-full rounded-xl bg-[#f1683a] px-5 py-4 text-lg font-semibold text-white shadow-[0_12px_24px_rgba(241,104,58,0.25)] transition hover:bg-[#e95d2f]"

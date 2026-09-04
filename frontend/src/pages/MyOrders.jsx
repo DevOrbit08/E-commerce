@@ -8,10 +8,10 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const MyOrders = () => {
 
   const [myOrders, setMyOrders] = useState([])
+  const [cancellingOrder, setCancellingOrder] = useState(null)
   const { currency } = useAppContext()
 
-  useEffect(()=>{
-    const fetchOrders = async ()=>{
+  const fetchOrders = async ()=>{
       try{
         const res = await fetch(`${API_URL}/api/order/user`, { credentials: 'include' });
         const data = await res.json();
@@ -24,9 +24,42 @@ const MyOrders = () => {
         setMyOrders([]);
         toast.error('Failed to load orders');
       }
-    }
+  }
+
+  useEffect(()=>{
     fetchOrders();
   },[])
+
+  const cancelOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to cancel this order?')) return;
+
+    try {
+      setCancellingOrder(orderId);
+      const res = await fetch(`${API_URL}/api/order/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json();
+      if (data?.success) {
+        toast.success('Order cancelled');
+        await fetchOrders();
+      } else {
+        toast.error(data?.message || 'Unable to cancel order');
+      }
+    } catch (err) {
+      toast.error('Failed to cancel order');
+    } finally {
+      setCancellingOrder(null);
+    }
+  }
+
+  const getStatusStyle = (status) => {
+    if (status === 'Delivered') return 'bg-green-100 text-green-700';
+    if (status === 'Cancelled') return 'bg-red-100 text-red-700';
+    return 'bg-gray-100 text-gray-600';
+  }
 
   return (
     <div className='mt-16 pb-16'>
@@ -43,19 +76,35 @@ const MyOrders = () => {
         myOrders.map((order, index) => (
           <div
             key={index}
-            className='border border-gray-300 rounded-lg mb-10 p-4 py-5 max-w-4xl'
+            className='relative border border-gray-300 rounded-lg mb-10 p-4 py-5 max-w-4xl'
           >
             <p className='flex justify-between md:items-center text-gray-400 md:font-medium max-md:flex-col'>
               <span>OrderId : {order._id}</span>
               <span>Payment : {order.paymentType}</span>
-              <span>Total Amount : {currency}{order.amount}</span>
+              <span className='flex items-center gap-3'>
+                <span>Total Amount : {currency}{order.amount}</span>
+                <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${getStatusStyle(order.status)}`}>
+                  {order.status === 'Order Placed' ? 'Arriving' : order.status}
+                </span>
+              </span>
             </p>
+            {order.status !== 'Delivered' && order.status !== 'Cancelled' && (
+              <button
+                type='button'
+                onClick={() => cancelOrder(order._id)}
+                disabled={cancellingOrder === order._id}
+                className='absolute left-4 top-14 rounded-md border border-red-200 px-3 py-1.5 text-sm text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50'
+              >
+                {cancellingOrder === order._id ? 'Cancelling...' : 'Cancel my order'}
+              </button>
+            )}
 
             {(Array.isArray(order.items) ? order.items : []).map((item, index) => {
               const prod = item && item.product ? item.product : {};
-              const imgSrc = (prod.image && prod.image[0]) ? prod.image[0] : assets.upload_area;
+              const productImages = prod.images || prod.image || [];
+              const imgSrc = productImages[0] || assets.upload_area;
               const name = prod.name || 'Product';
-              const category = prod.category || 'N/A';
+              const category = Array.isArray(prod.category) ? prod.category.join(', ') : (prod.category || 'N/A');
               const unitPrice = prod.offerPrice ? prod.offerPrice : (item.price || 0);
               const qty = item.quantity || 1;
               return (
@@ -83,7 +132,6 @@ const MyOrders = () => {
 
                   <div className='flex flex-col justify-center md:ml-8 mb-4 md:mb-0'>
                     <p>Quantity: {qty}</p>
-                    <p>Status: {order.status}</p>
                     <p>
                       Date: {new Date(order.createdAt).toLocaleDateString()}
                     </p>

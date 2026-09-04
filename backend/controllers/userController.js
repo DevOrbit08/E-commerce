@@ -5,16 +5,17 @@ import jwt from 'jsonwebtoken';
 // Register User : /api/user/register
 export const register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
-        if(!name || !email || !password){
+        const { name, identifier, password } = req.body;
+        if(!name || !identifier || !password){
             return res.json({success: false, message: 'Missing Details'});
         }
-        
-        const existingUser = await User.findOne({email});
+        const isEmail = identifier.includes('@');
+        const contact = isEmail ? { email: identifier.trim().toLowerCase() } : { phone: identifier.trim() };
+        const existingUser = await User.findOne(contact);
         if(existingUser)
             return res.json({success: false, message: "User Already Exists"});
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await User.create({name, email, password: hashedPassword});
+        const user = await User.create({name: name.trim(), ...contact, password: hashedPassword});
         
         const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '7d'});
 
@@ -25,7 +26,7 @@ export const register = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration time
             path: '/'
         })
-        return res.json({success: true, user: {email: user.email, name: user.name}});
+        return res.json({success: true, user: {email: user.email, phone: user.phone, name: user.name}});
     } catch (error) {
         console.log(error.message);
         res.json({success: false, message: error.message});
@@ -36,11 +37,15 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        const {email, password} = req.body;
-        if(!email || !password){
-            return res.json({success: false, message: "Email and Password are required"});
+        const {identifier, password} = req.body;
+        if(!identifier || !password){
+            return res.json({success: false, message: "Email/Phone and Password are required"});
         }
-        const user = await User.findOne({email});
+        const normalizedIdentifier = identifier.trim();
+        const query = normalizedIdentifier.includes('@')
+            ? { email: normalizedIdentifier.toLowerCase() }
+            : { phone: normalizedIdentifier };
+        const user = await User.findOne(query);
         if(!user){
             return res.json({success: false, message: "Invalid Email or Password"});
         }
@@ -56,11 +61,47 @@ export const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000,
             path: '/' 
         });
-        return res.json({success: true, user: {email: user.email, name: user.name}});
+        return res.json({success: true, user: {email: user.email, phone: user.phone, name: user.name}});
 
     } catch (error) {
         console.log(error.message);
         res.json({success: false, message: error.message});       
+    }
+
+}
+
+export const updateProfile = async (req, res) => {
+    try {
+        const { name, email, phone } = req.body;
+        if (!name || (!email && !phone)) {
+            return res.json({ success: false, message: 'Name and email or phone are required' });
+        }
+        const update = { name: name.trim() };
+        const normalizedEmail = email?.trim().toLowerCase();
+        const normalizedPhone = phone?.trim();
+        if (normalizedEmail || normalizedPhone) {
+            const duplicate = await User.findOne({
+                _id: { $ne: req.userId },
+                $or: [
+                    ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
+                    ...(normalizedPhone ? [{ phone: normalizedPhone }] : []),
+                ],
+            }).select('_id email phone');
+            if (duplicate) {
+                return res.json({
+                    success: false,
+                    message: duplicate.email === normalizedEmail
+                        ? 'This email is already linked to another account'
+                        : 'This phone number is already linked to another account',
+                });
+            }
+        }
+        if (normalizedEmail) update.email = normalizedEmail;
+        if (normalizedPhone) update.phone = normalizedPhone;
+        const user = await User.findByIdAndUpdate(req.userId, update, { new: true, runValidators: true }).select('-password');
+        return res.json({ success: true, user });
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
     }
 }
 
@@ -71,10 +112,20 @@ export const isAuth = async (req, res) => {
         if (!user) {
             return res.json({ success: false, message: "User not found" });
         }
+
         res.json({success: true, user});
     } catch (error) {
         console.log(error.message);
         res.json({success: false, message: error.message}); 
+    }
+}
+
+export const getCustomers = async (req, res) => {
+    try {
+        const customers = await User.find().select('-password').sort({ createdAt: -1 });
+        return res.json({ success: true, customers });
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
     }
 }
 
@@ -93,4 +144,3 @@ export  const logout = async (req, res) => {
         res.json({success: false, message: error.message});
     }
 }
-

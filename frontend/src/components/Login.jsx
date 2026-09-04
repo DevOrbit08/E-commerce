@@ -12,7 +12,7 @@ const Login = () => {
 
     const [formData, setFormData] = React.useState({
         name: '',
-        email: '',
+        identifier: '',
         password: ''
     })
 
@@ -20,7 +20,7 @@ const Login = () => {
       event.preventDefault();
       const url = state === 'login' ? `${API_URL}/api/user/login` : `${API_URL}/api/user/register`;
       try {
-        const payload = state === 'login' ? { email: formData.email, password: formData.password } : { name: formData.name, email: formData.email, password: formData.password };
+        const payload = state === 'login' ? { identifier: formData.identifier, password: formData.password } : { name: formData.name, identifier: formData.identifier, password: formData.password };
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -69,7 +69,7 @@ const Login = () => {
 
             <div className="flex items-center w-full mt-4 bg-gray-800 border border-gray-700 h-12 rounded-full overflow-hidden pl-6 gap-2 ">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-gray-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /> <rect x="2" y="4" width="20" height="16" rx="2" /> </svg>
-                <input type="email" name="email" placeholder="Email id" className="w-full bg-transparent text-white placeholder-gray-400 border-none outline-none " value={formData.email} onChange={handleChange} required />
+                <input type="text" name="identifier" placeholder="Email / Phone number" className="w-full bg-transparent text-white placeholder-gray-400 border-none outline-none " value={formData.identifier} onChange={handleChange} required />
             </div>
 
             <div className=" flex items-center mt-4 w-full bg-gray-800 border border-gray-700 h-12 rounded-full overflow-hidden pl-6 gap-2 ">

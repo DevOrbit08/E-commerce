@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { Link, useParams } from "react-router-dom";
 import { assets } from "../assets/assets";
@@ -10,30 +10,46 @@ const ProductDetails = () => {
     const {id} = useParams()
     const [relatedProducts, setRelatedProducts] =useState([]);
     const [thumbnail, setThumbnail] =useState(null);
+    const [selectedUnit, setSelectedUnit] = useState("");
 
     const product = products.find((item)=> item._id === id);
+    const variants = useMemo(() => {
+      if (!product) return [];
+      if (Array.isArray(product.variants) && product.variants.length) return product.variants;
+      return [{ unit: product.unit || product.weight || "1 pack", price: product.price, offerPrice: product.offerPrice, inStock: product.inStock }];
+    }, [product]);
+    const selectedVariant = variants.find((variant) => variant.unit === selectedUnit) || variants[0];
 
     // safe images list with fallback
-    const images = product ? (product.image && product.image.length ? product.image : [assets.upload_area]) : [assets.upload_area];
+    const images = product
+      ? (selectedVariant?.image
+        ? [selectedVariant.image, ...(product.image || []).filter((image) => image !== selectedVariant.image)]
+        : (product.image && product.image.length ? product.image : [assets.upload_area]))
+      : [assets.upload_area];
 
     useEffect(()=> {
       if(products.length > 0 && product){
         let productsCopy = products.slice();
-        productsCopy = productsCopy.filter((item)=> product.category === item.category)
+        productsCopy = productsCopy.filter((item)=> {
+          const productCategories = Array.isArray(product.category) ? product.category : [product.category]
+          const itemCategories = Array.isArray(item.category) ? item.category : [item.category]
+          return productCategories.some((category) => itemCategories.includes(category))
+        })
         setRelatedProducts(productsCopy.slice(0,5))
       }
     },[products, product])
 
     useEffect(()=> {
       setThumbnail(images[0] || assets.upload_area)
-    },[product])
+      setSelectedUnit(product?.variants?.[0]?.unit || product?.unit || "");
+    },[product, selectedVariant?.image])
 
     return product && (
         <div className="mt-12">
             <p>
                 <Link to={"/"}>Home</Link> /
                 <Link to="/products"> Products</Link> /
-                <Link to={`/products/${product.category.toLowerCase()}`}> {product.category}</Link> /
+                <Link to={`/products/${(Array.isArray(product.category) ? product.category[0] : product.category).toLowerCase()}`}> {Array.isArray(product.category) ? product.category.join(', ') : product.category}</Link> /
                 <span className="text-primary"> {product.name}</span>
             </p>
 
@@ -65,10 +81,35 @@ const ProductDetails = () => {
                     </div>
 
                     <div className="mt-6">
-                        <p className="text-gray-500/70 line-through">MRP: {currency}{product.price}</p>
-                        <p className="text-2xl font-medium">MRP: {currency}{product.offerPrice}</p>
+                        <p className="text-gray-500/70 line-through">MRP: {currency}{selectedVariant?.price}</p>
+                        <p className="text-2xl font-medium">MRP: {currency}{selectedVariant?.offerPrice}</p>
                         <span className="text-gray-500/70">(inclusive of all taxes)</span>
                     </div>
+
+                    {variants.length > 1 && (
+                      <div className="mt-5">
+                        <p className="mb-2 text-base font-medium">Select pack size</p>
+                        <div className="flex flex-wrap gap-2">
+                          {variants.map((variant) => (
+                            <button
+                              key={variant.unit}
+                              type="button"
+                              disabled={!variant.inStock}
+                              onClick={() => setSelectedUnit(variant.unit)}
+                              className={`rounded-lg border px-4 py-2 text-sm ${
+                                selectedVariant?.unit === variant.unit
+                                  ? "border-gray-900 bg-gray-900 text-white"
+                                  : variant.inStock
+                                    ? "border-gray-300 bg-white text-gray-700"
+                                    : "cursor-not-allowed border-dashed border-gray-300 bg-gray-100 text-gray-400 line-through"
+                              }`}
+                            >
+                              {variant.unit}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     <p className="text-base font-medium mt-6">About Product</p>
                     <ul className="list-disc ml-4 text-gray-500/70">
@@ -78,10 +119,10 @@ const ProductDetails = () => {
                     </ul>
 
                     <div className="flex items-center mt-10 gap-4 text-base">
-                        <button onClick={()=> addToCart(product._id)} className="w-full py-3.5 cursor-pointer font-medium bg-gray-100 text-gray-800/80 hover:bg-gray-200 transition" >
+                        <button disabled={!selectedVariant?.inStock} onClick={()=> addToCart(product._id)} className="w-full py-3.5 cursor-pointer font-medium bg-gray-100 text-gray-800/80 hover:bg-gray-200 transition disabled:cursor-not-allowed disabled:opacity-50" >
                             Add to Cart
                         </button>
-                        <button onClick={()=> {addToCart(product._id); navigate("/cart")}} className="w-full py-3.5 cursor-pointer font-medium bg-primary-dull text-white hover:bg-primary transition" >
+                        <button disabled={!selectedVariant?.inStock} onClick={()=> {addToCart(product._id); navigate("/cart")}} className="w-full py-3.5 cursor-pointer font-medium bg-primary-dull text-white hover:bg-primary transition disabled:cursor-not-allowed disabled:opacity-50" >
                             Buy now
                         </button>
                     </div>

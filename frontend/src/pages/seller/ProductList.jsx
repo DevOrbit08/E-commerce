@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../context/AppContext'
 import { assets } from '../../assets/assets'
 import toast from 'react-hot-toast'
+import { PRODUCT_CATEGORIES } from '../../constants/productCategories'
+import CategoryMultiSelect from '../../components/CategoryMultiSelect'
 
 const API_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:8000'
@@ -11,22 +13,12 @@ const LOW_STOCK_THRESHOLD = 20
 const PAGE_SIZE_OPTIONS = [10, 20, 50]
 const ADD_PRODUCT_ROUTE = '/seller'
 
-const PRODUCT_CATEGORIES = [
-  'Household Items',
-  'Spices & Essentials',
-  'Cold Drinks',
-  'Instant Food',
-  'Dairy Products',
-  'Bakery & Breads',
-  'Grains & Cereals',
-]
-
 const UNIT_OPTIONS = ['g', 'kg', 'ml', 'L', 'pcs', 'pack']
 
 const EMPTY_FORM = {
   name: '',
   description: '',
-  category: '',
+  category: [],
   brand: '',
   weight: '',
   unit: 'g',
@@ -133,7 +125,7 @@ const ProductList = () => {
   const categories = useMemo(() => {
     const categorySet = new Set(
       (products || [])
-        .map((product) => product.category)
+        .flatMap((product) => Array.isArray(product.category) ? product.category : [product.category])
         .filter(Boolean)
     )
 
@@ -165,17 +157,23 @@ const ProductList = () => {
     const total = productList.length
 
     const outOfStock = productList.filter(
-      (product) =>
-        !product.inStock ||
-        Number(product.quantity) === 0
+      (product) => product.inStock === false
     ).length
 
     const lowStock = productList.filter(
       (product) =>
         product.inStock &&
-        Number(product.quantity) > 0 &&
-        Number(product.quantity) <=
-          LOW_STOCK_THRESHOLD
+        (
+          (Number(product.quantity) > 0 &&
+            Number(product.quantity) <= LOW_STOCK_THRESHOLD) ||
+          (Array.isArray(product.variants) &&
+            product.variants.some(
+              (variant) =>
+                variant.inStock &&
+                Number(variant.quantity) > 0 &&
+                Number(variant.quantity) <= LOW_STOCK_THRESHOLD
+            ))
+        )
     ).length
 
     return {
@@ -204,7 +202,7 @@ const ProductList = () => {
 
       const matchesCategory =
         categoryFilter === 'all' ||
-        product.category === categoryFilter
+        (Array.isArray(product.category) ? product.category.includes(categoryFilter) : product.category === categoryFilter)
 
       return matchesSearch && matchesCategory
     })
@@ -254,7 +252,7 @@ const ProductList = () => {
         ? product.description.join('\n')
         : product.description || '',
 
-      category: product.category || '',
+      category: Array.isArray(product.category) ? product.category : (product.category ? [product.category] : []),
       brand: product.brand || '',
 
       weight:
@@ -289,7 +287,7 @@ const ProductList = () => {
       return
     }
 
-    if (!form.category) {
+    if (!form.category.length) {
       toast.error('Please select a category')
       return
     }
@@ -434,6 +432,31 @@ const ProductList = () => {
 
         if (fetchProducts) {
           await fetchProducts()
+        }
+
+        const toggleVariantStock = async (product, variant) => {
+          try {
+            setLoadingId(`${product._id}-${variant.unit}`)
+            const quantity = variant.inStock ? 0 : (Number(variant.quantity) > 0 ? Number(variant.quantity) : 1)
+            const response = await fetch(`${API_URL}/api/product/stock`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ id: product._id, variantUnit: variant.unit, quantity }),
+            })
+            const data = await response.json()
+            if (data?.success) {
+              toast.success(`${variant.unit} marked ${variant.inStock ? 'out of' : 'in'} stock`)
+              if (fetchProducts) await fetchProducts()
+            } else {
+              toast.error(data?.message || 'Failed to update variant stock')
+            }
+          } catch (error) {
+            console.error(error)
+            toast.error('Network error while updating variant stock')
+          } finally {
+            setLoadingId(null)
+          }
         }
       } else {
         toast.error(
@@ -685,7 +708,7 @@ const ProductList = () => {
                   </td>
 
                   <td className="px-4 py-3">
-                    {product.category}
+                    {Array.isArray(product.category) ? product.category.join(', ') : product.category}
                   </td>
 
                   <td className="hidden px-4 py-3 md:table-cell">
@@ -699,6 +722,27 @@ const ProductList = () => {
                   </td>
 
                   <td className="px-4 py-3">
+                    {Array.isArray(product.variants) && product.variants.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {product.variants.map((variant) => (
+                          <button
+                            key={variant.unit}
+                            type="button"
+                            role="switch"
+                            aria-checked={Boolean(variant.inStock)}
+                            disabled={loadingId === `${product._id}-${variant.unit}`}
+                            onClick={() => toggleVariantStock(product, variant)}
+                            className={`rounded-lg border px-2 py-1 text-xs font-medium transition disabled:opacity-60 ${
+                              variant.inStock
+                                ? 'border-[#b8e8cd] bg-[#e8f7ef] text-[#218b52]'
+                                : 'border-[#e0d6cf] bg-[#f3eeea] text-[#8a8079]'
+                            }`}
+                          >
+                            {variant.unit}: {variant.inStock ? 'In stock' : 'Out'}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
                     <button
                       type="button"
                       role="switch"
@@ -726,6 +770,7 @@ const ProductList = () => {
                         }`}
                       />
                     </button>
+                    )}
                   </td>
 
                   <td className="px-4 py-3 text-right">
@@ -969,32 +1014,17 @@ const ProductList = () => {
                   <label className="flex flex-col gap-1.5 text-sm font-medium text-[#3f3935]">
                     Category
 
-                    <select
+                    <CategoryMultiSelect
                       value={form.category}
-                      onChange={(event) =>
+                      options={editCategoryOptions}
+                      compact
+                      onChange={(category) =>
                         setForm({
                           ...form,
-                          category:
-                            event.target.value,
+                          category,
                         })
                       }
-                      className="rounded-xl border border-[#d9cfc4] bg-white p-3 text-sm font-normal outline-none transition focus:border-[#f1683a]"
-                    >
-                      <option value="">
-                        Select category
-                      </option>
-
-                      {editCategoryOptions.map(
-                        (category) => (
-                          <option
-                            key={category}
-                            value={category}
-                          >
-                            {category}
-                          </option>
-                        )
-                      )}
-                    </select>
+                    />
                   </label>
 
                   <label className="flex flex-col gap-1.5 text-sm font-medium text-[#3f3935]">

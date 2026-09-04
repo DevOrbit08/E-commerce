@@ -16,7 +16,7 @@ const ProductCategory = () => {
 
   const filteredProducts = products.filter(
     (product) =>
-      product.category.toLowerCase() === normalizedCategory &&
+      (Array.isArray(product.category) ? product.category : [product.category]).some((item) => item.toLowerCase() === normalizedCategory) &&
       product.inStock
   );
 

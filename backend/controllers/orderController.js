@@ -174,6 +174,33 @@ export const getUserOrders = async (req, res) => {
     }
 }
 
+// Cancel an order by its owner : /api/order/cancel
+export const cancelOrder = async (req, res) => {
+    try {
+        const { orderId } = req.body;
+        const order = await Order.findOne({ _id: orderId, userId: req.userId });
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        if (order.status === 'Delivered') {
+            return res.status(400).json({ success: false, message: 'Delivered orders cannot be cancelled' });
+        }
+
+        if (order.status === 'Cancelled') {
+            return res.json({ success: true, message: 'Order is already cancelled', order });
+        }
+
+        order.status = 'Cancelled';
+        await order.save();
+        res.json({ success: true, message: 'Order cancelled successfully', order });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
 // Get all orders (for seller / admin) : /api/order/seller
 export const getAllOrders = async (req, res) => {
     try {

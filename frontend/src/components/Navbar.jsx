@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { assets } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
 import toast from 'react-hot-toast';
+import ProfileOverlay from './ProfileOverlay';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -16,6 +17,8 @@ const Navbar = () => {
     searchQuery,
     getCartCount,
   } = useAppContext();
+
+  const [showProfile, setShowProfile] = React.useState(false);
 
   const logout = async () => {
     try{
@@ -31,14 +34,14 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    if (searchQuery.length > 0) {
+    if (typeof searchQuery === 'string' && searchQuery.length > 0) {
       navigate("/products");
     }
   }, [searchQuery]);
 
   return (
     <nav className="border-b bg-white">
-      <div className="flex items-center justify-between px-6 md:px-16 lg:px-24 xl:px-32 py-4">
+      <div className="relative flex items-center justify-between gap-6 px-6 py-4 md:px-16 lg:px-24 xl:px-32">
         
         {/* Logo - Left */}
         <NavLink to="/" className="flex-shrink-0">
@@ -46,24 +49,27 @@ const Navbar = () => {
         </NavLink>
 
         {/* Right Side Menu */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 lg:gap-6">
           
           {/* Desktop Menu Links */}
           <div className="hidden lg:flex items-center gap-6 text-sm">
             <NavLink to="/" className="hover:text-primary">Home</NavLink>
             <NavLink to="/products" className="hover:text-primary">All Products</NavLink>
-            <NavLink to="/contact" className="hover:text-primary">Contact</NavLink>
+            {user && (
+              <NavLink to="/my-orders" className="hover:text-primary">My Orders</NavLink>
+            )}
           </div>
 
           {/* Search */}
-          <div className="hidden lg:flex items-center gap-3 border px-4 py-2 rounded-full">
+          <div className="hidden lg:absolute lg:left-1/2 lg:top-1/2 lg:flex w-[520px] -translate-x-1/2 -translate-y-1/2 items-center gap-3 rounded-xl border border-gray-300 bg-[#fffdfa] px-5 py-3 xl:w-[620px]">
+            <img src={assets.search_icon} className="w-5 shrink-0 opacity-70" alt="Search" />
             <input
               type="text"
-              placeholder="Search products"
-              className="outline-none bg-transparent text-sm w-40"
+              placeholder="Search Producct here..."
+              value={typeof searchQuery === 'string' ? searchQuery : ''}
+              className="w-full bg-transparent text-sm outline-none"
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <img src={assets.search_icon} className="w-5" />
           </div>
 
           {/* Cart */}
@@ -78,7 +84,7 @@ const Navbar = () => {
             }}
             className="relative cursor-pointer"
           >
-            <img src={assets.nav_cart_icon} className="w-6 opacity-80" />
+            <img src={assets.nav_cart_icon} className="w-6 opacity-80" alt="Cart" />
             <span className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full flex items-center justify-center">
               {getCartCount()}
             </span>
@@ -93,7 +99,7 @@ const Navbar = () => {
               Login
             </button>
           ) : (
-            <div className="relative group cursor-pointer">
+            <button type="button" onClick={() => setShowProfile(true)} className="cursor-pointer">
               {/* Profile Circle */}
               <img
                 src={assets.profile_icon}
@@ -101,26 +107,11 @@ const Navbar = () => {
                 className="w-10 h-10 rounded-full border"
               />
 
-              {/* Hover Dropdown */}
-              <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <button
-                  onClick={() => navigate("/my-orders")}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                >
-                  My Orders
-                </button>
-
-                <button
-                  onClick={logout}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-red-500"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
+            </button>
           )}
         </div>
       </div>
+      {showProfile && <ProfileOverlay onClose={() => setShowProfile(false)} onLogout={logout} />}
     </nav>
   );
 };

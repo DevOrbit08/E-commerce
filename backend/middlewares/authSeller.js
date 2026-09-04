@@ -5,7 +5,7 @@ const authSeller = async (req, res, next) => {
     const {sellerToken} = req.cookies;
 
     if(!sellerToken){
-        return res.json({succes: false, message: "Not Authorized"});
+        return res.json({success: false, message: "Not Authorized"});
     }
     try {
         const tokenDecode = jwt.verify(sellerToken, process.env.JWT_SECRET);

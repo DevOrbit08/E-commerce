@@ -4,6 +4,7 @@ import Categories from '../components/Categories'
 import BestSeller from '../components/BestSeller'
 import BottomBanner from '../components/BottomBanner'
 import NewsLetter from '../components/NewsLetter'
+import PromoAds from '../components/PromoAds'
 
 const Home = () => {
   return (
@@ -11,6 +12,7 @@ const Home = () => {
     <div className='mt-10'>
       <MainBanner />
       <Categories />
+      <PromoAds />
       <BestSeller/>
       <BottomBanner/>
       <NewsLetter/>

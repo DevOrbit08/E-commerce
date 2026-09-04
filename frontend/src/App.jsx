@@ -17,6 +17,8 @@ import SellerLayout from './pages/seller/SellerLayout';
 import AddProduct from './pages/seller/AddProduct';
 import ProductList from './pages/seller/ProductList';
 import Orders from './pages/seller/Orders';
+import Customers from './pages/seller/Customers';
+import DeliveryPartners from './pages/seller/DeliveryPartners';
 
 
 const App = () => {
@@ -46,6 +48,8 @@ const App = () => {
           <Route index element={isSeller ? <AddProduct/> : null}/>
           <Route path='product-list' element={<ProductList/>}/>
           <Route path='orders' element={<Orders/>}/>
+          <Route path='customers' element={<Customers/>}/>
+          <Route path='delivery-partners' element={<DeliveryPartners/>}/>
           </Route>
         </Routes>
       </div>

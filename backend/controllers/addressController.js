@@ -1,4 +1,5 @@
 import Address from '../models/Address.js';
+import User from '../models/User.js';
 
 // Add Address : /api/address/add
 export const addAddress = async (req, res) => {
@@ -8,17 +9,25 @@ export const addAddress = async (req, res) => {
         if (!address || !userId) {
             return res.json({ success: false, message: 'Missing address or user' });
         }
-        // Normalize fields: client uses zip, model expects zipcode
+        const fullName = (address.fullName || `${address.firstName || ''} ${address.lastName || ''}`).trim();
+        const nameParts = fullName.split(/\s+/);
+        const user = await User.findById(userId).select('email');
+
+        if (!fullName || !address.phone || !address.city || !address.state || !(address.zip || address.zipcode)) {
+            return res.json({ success: false, message: 'Please complete all required address fields' });
+        }
+
+        // Normalize the form fields to the address schema.
         const addrPayload = {
             userId,
-            firstName: address.firstName,
-            lastName: address.lastName,
-            email: address.email,
-            street: address.street,
+            firstName: nameParts[0],
+            lastName: nameParts.slice(1).join(' '),
+            email: address.email || user?.email || '',
+            street: [address.houseFlat, address.street].filter(Boolean).join(', '),
             city: address.city,
             state: address.state,
             zipcode: Number(address.zip || address.zipcode || 0),
-            country: address.country,
+            country: address.country || 'India',
             phone: address.phone,
         };
         const created = await Address.create(addrPayload);

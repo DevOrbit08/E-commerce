@@ -1,4 +1,6 @@
 import { assets } from "../assets/assets";
+import { Link } from "react-router-dom";
+import { PRODUCT_CATEGORIES } from "../constants/productCategories";
 
 
 const Footer = () => {
@@ -16,20 +18,31 @@ const Footer = () => {
                         <img src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/refs/heads/main/assets/appDownload/appleStoreBtnBlack.svg" alt="app store" className="h-10 w-auto border border-white rounded" />
                     </div>
                 </div>
-                <div className="flex-1 flex items-start md:justify-end gap-20 md:gap-40">
+                <div className="grid flex-1 grid-cols-2 gap-8 md:grid-cols-[160px_minmax(0,1fr)_180px] md:gap-10">
                     <div>
-                        <h2 className="font-semibold mb-5 text-black">Company</h2>
+                        <h2 className="mb-5 font-semibold text-black">Shop</h2>
                         <ul className="text-sm space-y-2">
-                            <li><a href="#">Home</a></li>
-                            <li><a href="#">About us</a></li>
-                            <li><a href="#">Contact us</a></li>
-                            
+                            <li><Link to="/" className="hover:text-primary">Home</Link></li>
+                            <li><Link to="/products" className="hover:text-primary">All Products</Link></li>
+                        </ul>
+                    </div>
+                    <div className="col-span-2 md:col-span-1">
+                        <div className="mb-5 flex items-center gap-4">
+                            <h2 className="font-semibold text-black">Categories</h2>
+                            <Link to="/products" className="text-primary hover:text-primary-dull">see all</Link>
+                        </div>
+                        <ul className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm md:grid-cols-3 md:gap-x-10">
+                            {PRODUCT_CATEGORIES.map((category) => (
+                                <li key={category} className="whitespace-nowrap">
+                                    <Link to={`/products/${category.toLowerCase()}`} className="hover:text-primary">{category}</Link>
+                                </li>
+                            ))}
                         </ul>
                     </div>
                     <div>
-                        <h2 className="font-semibold mb-5 text-black">Get in touch</h2>
+                        <h2 className="mb-5 font-semibold text-black">Contact</h2>
                         <div className="text-sm space-y-2">
-                            <p>+1-234-567-890</p>
+                            <p>+91 8421725327</p>
                             <p>greencart@gmail.com</p>
                         </div>
                     </div>
