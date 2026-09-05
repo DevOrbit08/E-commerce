@@ -557,7 +557,7 @@ const ProductList = () => {
 
           <StatCard
             icon="⬇️"
-            label="Low stock"
+            label="In stock"
             value={stats.lowStock}
             caption="Require attention"
             tone="amber"

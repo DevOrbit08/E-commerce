@@ -6,7 +6,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const SellerLogin = () => {
   const {isSeller, setIsSeller, navigate} = useAppContext()
-  const[email, setEamil] = useState("");
+  const[identifier, setIdentifier] = useState("");
   const[password, setPassword] = useState("");
 
   const onSubmitHandler = async (event)=>{
@@ -16,7 +16,7 @@ const SellerLogin = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email: email.trim().toLowerCase(), password })
+        body: JSON.stringify({ identifier: identifier.trim(), password })
       });
       const data = await res.json();
       if(data && data.success){
@@ -42,9 +42,9 @@ const SellerLogin = () => {
        <div className='flex flex-col gap-5 m-auto items-start p-8 py-12 min-w-80 sm:min-w-88 rounsed-lg shadow-xl border border-gray-200'>
         <p className='text-2xl font-medium m-auto'><span className='text-primary'>Seller</span> Login</p>
         <div className='w-full'>
-          <p>Email</p>
-          <input onChange={(e)=>setEamil(e.target.value)} value={email}
-          type="email" placeholder="Enter Your Email"
+          <p>Email / Phone Number</p>
+          <input onChange={(e)=>setIdentifier(e.target.value)} value={identifier}
+          type="text" placeholder="Enter your email or phone number"
           className="border border-gray-200 rounded w-full p-2 mt-1 outline-primary"/>
         </div>
         <div className='w-full'>

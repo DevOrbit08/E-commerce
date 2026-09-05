@@ -19,11 +19,13 @@ import ProductList from './pages/seller/ProductList';
 import Orders from './pages/seller/Orders';
 import Customers from './pages/seller/Customers';
 import DeliveryPartners from './pages/seller/DeliveryPartners';
+import DeliveryPartnerLogin from './pages/deliveryPartner/DeliveryPartnerLogin';
 
 
 const App = () => {
 
-  const isSellerPath = useLocation().pathname.includes("seller");
+  const currentPath = useLocation().pathname;
+  const isSellerPath = currentPath.includes("seller") || currentPath.startsWith("/delivery-partner");
   const {showUserLogin, isSeller} = useAppContext()
 
   return (
@@ -44,6 +46,7 @@ const App = () => {
           <Route path='/Cart' element={<Cart/>} />
           <Route path='/add-address' element={<AddAddress/>} />
           <Route path='/my-orders' element={<MyOrders/>} />
+          <Route path='/delivery-partner' element={<DeliveryPartnerLogin/>} />
           <Route path='/seller' element={isSeller ? <SellerLayout/> : <SellerLogin/>}>
           <Route index element={isSeller ? <AddProduct/> : null}/>
           <Route path='product-list' element={<ProductList/>}/>

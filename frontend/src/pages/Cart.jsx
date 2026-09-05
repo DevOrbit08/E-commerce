@@ -233,7 +233,7 @@ const Cart = () => {
               const lineTotal = unitPrice * currentQty;
 
               return (
-                <div key={product._id} className="flex items-center gap-4 rounded-[20px] border border-[#ebddd2] bg-white p-3 shadow-[0_8px_20px_rgba(0,0,0,0.02)]">
+                <div key={product._id} onClick={() => { navigate(`/products/${(Array.isArray(product.category) ? product.category[0] : product.category).toLowerCase()}/${product._id}`); window.scrollTo(0, 0) }} className="flex cursor-pointer items-center gap-4 rounded-[20px] border border-[#ebddd2] bg-white p-3 shadow-[0_8px_20px_rgba(0,0,0,0.02)] transition hover:shadow-md">
                   <div className="flex h-[104px] w-[104px] items-center justify-center overflow-hidden rounded-[16px] bg-[#f6efe9] p-2">
                     <img
                       src={(product.image && product.image[0]) ? product.image[0] : assets.upload_area}
@@ -262,7 +262,7 @@ const Cart = () => {
                         <button
                           type="button"
                           className="flex h-7 w-7 items-center justify-center rounded-full text-[#f1683a] hover:bg-[#fff1eb]"
-                          onClick={() => updateCartItem(product._id, Math.max(1, currentQty - 1))}
+                          onClick={(event) => { event.stopPropagation(); updateCartItem(product._id, Math.max(1, currentQty - 1)) }}
                         >
                           <Minus size={14} />
                         </button>
@@ -270,7 +270,7 @@ const Cart = () => {
                         <button
                           type="button"
                           className="flex h-7 w-7 items-center justify-center rounded-full text-[#f1683a] hover:bg-[#fff1eb]"
-                          onClick={() => updateCartItem(product._id, currentQty + 1)}
+                          onClick={(event) => { event.stopPropagation(); updateCartItem(product._id, currentQty + 1) }}
                         >
                           <Plus size={14} />
                         </button>
@@ -283,7 +283,7 @@ const Cart = () => {
 
                       <button
                         type="button"
-                        onClick={() => removeFromCart(product._id)}
+                        onClick={(event) => { event.stopPropagation(); removeFromCart(product._id) }}
                         className="flex h-9 w-9 items-center justify-center rounded-full border border-[#f4d9d0] bg-[#fff5f2] text-[#d66246] transition hover:bg-[#ffeae3]"
                         aria-label="Remove item"
                       >
@@ -499,7 +499,7 @@ const Cart = () => {
         {[
           { icon: <PackageCheck size={18} />, text: "100% Original Products" },
           { icon: <Truck size={18} />, text: "On-time Delivery" },
-          { icon: <ShieldCheck size={18} />, text: "Easy Returns" },
+          { icon: <ShieldCheck size={18} />, text: "No Returns" },
           { icon: <Gift size={18} />, text: "Need help? We’re here" },
         ].map((item, idx) => (
           <div key={idx} className="flex items-center gap-3 rounded-xl border border-[#e9ddd2] bg-[#faf6f2] px-3 py-2 text-sm text-[#5d5752]">
