@@ -120,7 +120,7 @@ const Cart = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ address: selectedAddress, items: itemsPayload }),
+          body: JSON.stringify({ address: selectedAddress._id, items: itemsPayload }),
         });
         const data = await res.json();
         if (data && data.success) {
@@ -136,7 +136,7 @@ const Cart = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ address: selectedAddress, items: itemsPayload, paymentMethod: selectedPaymentMethod }),
+          body: JSON.stringify({ address: selectedAddress._id, items: itemsPayload, paymentMethod: selectedPaymentMethod }),
         });
         const data = await res.json();
         if (data && data.success) {

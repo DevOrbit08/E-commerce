@@ -31,10 +31,25 @@ const SellerLogin = () => {
   }
 
   useEffect(()=>{
-    if(isSeller){
-      navigate("/seller")
+    const checkSellerAuth = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/seller/is-auth`, { credentials: 'include' });
+        const data = await response.json();
+        if (data?.success) {
+          setIsSeller(true);
+        }
+      } catch {
+        setIsSeller(false);
+      }
+    };
+
+    if (isSeller) {
+      navigate("/seller");
+      return;
     }
-  },[isSeller])
+
+    checkSellerAuth();
+  },[isSeller, navigate, setIsSeller])
 
   return !isSeller && (
     <form onSubmit={onSubmitHandler} className='min-h-screen flex items-center text-sm text-gray-600'>

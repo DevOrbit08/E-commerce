@@ -20,6 +20,8 @@ import Orders from './pages/seller/Orders';
 import Customers from './pages/seller/Customers';
 import DeliveryPartners from './pages/seller/DeliveryPartners';
 import DeliveryPartnerLogin from './pages/deliveryPartner/DeliveryPartnerLogin';
+import { DeliveryPartnerCompletedOrders, DeliveryPartnerDeliveries, DeliveryPartnerOrders } from './pages/deliveryPartner/DeliveryPartnerPages';
+import NotFound from './pages/NotFound';
 
 
 const App = () => {
@@ -46,7 +48,12 @@ const App = () => {
           <Route path='/Cart' element={<Cart/>} />
           <Route path='/add-address' element={<AddAddress/>} />
           <Route path='/my-orders' element={<MyOrders/>} />
-          <Route path='/delivery-partner' element={<DeliveryPartnerLogin/>} />
+          <Route path='/delivery-partner' element={<DeliveryPartnerLogin/>}>
+            <Route index element={<DeliveryPartnerOrders />} />
+            <Route path='orders' element={<DeliveryPartnerOrders />} />
+            <Route path='deliveries' element={<DeliveryPartnerDeliveries />} />
+            <Route path='completed-orders' element={<DeliveryPartnerCompletedOrders />} />
+          </Route>
           <Route path='/seller' element={isSeller ? <SellerLayout/> : <SellerLogin/>}>
           <Route index element={isSeller ? <AddProduct/> : null}/>
           <Route path='product-list' element={<ProductList/>}/>
@@ -54,6 +61,7 @@ const App = () => {
           <Route path='customers' element={<Customers/>}/>
           <Route path='delivery-partners' element={<DeliveryPartners/>}/>
           </Route>
+          <Route path='*' element={<NotFound/>} />
         </Routes>
       </div>
        {!isSellerPath && <Footer/>}
