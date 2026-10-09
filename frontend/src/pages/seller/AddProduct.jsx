@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { assets, categories } from '../../assets/assets';
+import { assets } from '../../assets/assets';
 import { PRODUCT_CATEGORIES } from '../../constants/productCategories';
 import CategoryMultiSelect from '../../components/CategoryMultiSelect';
 
@@ -103,7 +103,7 @@ const AddProduct = () => {
         return;
       }
 
-      if (!name || !category.length || !price || !offerPrice) {
+      if (!name || !category.length || !price) {
         alert('Please fill required fields');
         return;
       }
@@ -113,8 +113,8 @@ const AddProduct = () => {
         name,
         description: [description || ''],
         price: Number(price),
-        offerPrice: Number(offerPrice),
-        mrp: Number(price || 0),
+        offerPrice: offerPrice === '' ? Number(price) : Number(offerPrice),
+        mrp: Number(price),
         category,
         brand,
         sku,
@@ -158,12 +158,12 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="w-full">
-      <form onSubmit={onSubmitHandler} className="mx-auto max-w-[1400px]">
+    <div className="w-full p-3 sm:p-5 md:p-6">
+      <form onSubmit={onSubmitHandler} className="mx-auto w-full max-w-none">
         <div className="mb-6 flex items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-4xl font-semibold text-[#1f1e1c]">Add a new product</h1>
+              <h1 className="text-2xl font-semibold text-[#1f1e1c] sm:text-3xl lg:text-4xl">Add a new product</h1>
               
             </div>
             <p className="mt-2 text-sm text-[#8a8079]">
@@ -177,9 +177,9 @@ const AddProduct = () => {
           {/* ---------------- LEFT COLUMN ---------------- */}
           <div className="contents">
             {/* Product images */}
-            <div className="rounded-[22px] border border-[#eadfd5] bg-[#fdfaf8] p-5 shadow-[0_6px_24px_rgba(25,19,15,0.03)] xl:col-start-2 xl:row-start-1">
+            <div className="rounded-[22px] border border-[#eadfd5] bg-[#fdfaf8] p-4 shadow-[0_6px_24px_rgba(25,19,15,0.03)] sm:p-5 xl:col-start-2 xl:row-start-1">
               <div className="mb-5 flex items-center justify-between gap-3">
-                <h2 className="text-[28px] font-semibold text-[#1f1e1c]">Product images</h2>
+                <h2 className="text-xl font-semibold text-[#1f1e1c] sm:text-2xl">Product images</h2>
                 <span className="rounded-full bg-[#fff1ec] px-2.5 py-1 text-sm font-medium text-[#f1683a]">
                   {uploadedCount} / 5
                 </span>
@@ -189,10 +189,10 @@ const AddProduct = () => {
                 {uploadedCount >= 1 ? 'Image uploaded. Ready to publish.' : 'Minimum 1 image is required before publishing.'}
               </p>
 
-              <div className="grid gap-5 sm:grid-cols-[190px_1fr]">
+              <div className="grid gap-4 sm:grid-cols-[190px_1fr] sm:gap-5">
                 <label
                   htmlFor="cover-upload"
-                  className="group relative flex h-[190px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-[18px] border border-dashed border-[#d7c8bc] bg-[#f6f0ec] transition hover:border-[#f1683a] hover:bg-[#fff9f6]"
+                  className="group relative flex h-40 w-full cursor-pointer items-center justify-center overflow-hidden rounded-[18px] border border-dashed border-[#d7c8bc] bg-[#f6f0ec] transition hover:border-[#f1683a] hover:bg-[#fff9f6]"
                 >
                   <input
                     id="cover-upload"
@@ -225,12 +225,12 @@ const AddProduct = () => {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
                     {[1, 2, 3, 4].map((index) => (
                       <label
                         key={index}
                         htmlFor={`image-upload-${index}`}
-                        className="group relative flex min-h-[86px] cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-[14px] border border-dashed border-[#d7c8bc] bg-[#f6f0ec] text-center transition hover:border-[#f1683a] hover:bg-[#fff9f6]"
+                        className="group relative flex min-h-[72px] cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-[14px] border border-dashed border-[#d7c8bc] bg-[#f6f0ec] text-center transition hover:border-[#f1683a] hover:bg-[#fff9f6]"
                       >
                         <input
                           id={`image-upload-${index}`}
@@ -264,8 +264,8 @@ const AddProduct = () => {
             </div>
 
             {/* Product information */}
-            <div className="rounded-[22px] border border-[#eadfd5] bg-[#fdfaf8] p-5 shadow-[0_6px_24px_rgba(25,19,15,0.03)] xl:col-start-1 xl:row-start-1 xl:row-span-3">
-              <h2 className="mb-5 text-[28px] font-semibold text-[#1f1e1c]">Product information</h2>
+            <div className="rounded-[22px] border border-[#eadfd5] bg-[#fdfaf8] p-4 shadow-[0_6px_24px_rgba(25,19,15,0.03)] sm:p-5 xl:col-start-1 xl:row-start-1 xl:row-span-3">
+              <h2 className="mb-5 text-xl font-semibold text-[#1f1e1c] sm:text-2xl">Product information</h2>
 
               <div className="space-y-5">
                 <div>
@@ -379,8 +379,8 @@ const AddProduct = () => {
           {/* ---------------- RIGHT COLUMN ---------------- */}
           <div className="contents">
             {/* Pricing */}
-            <div className="rounded-[22px] border border-[#eadfd5] bg-[#fdfaf8] p-5 shadow-[0_6px_24px_rgba(25,19,15,0.03)] xl:col-start-2 xl:row-start-2">
-              <h2 className="mb-5 text-[28px] font-semibold text-[#1f1e1c]">Pricing</h2>
+            <div className="rounded-[22px] border border-[#eadfd5] bg-[#fdfaf8] p-4 shadow-[0_6px_24px_rgba(25,19,15,0.03)] sm:p-5 xl:col-start-2 xl:row-start-2">
+              <h2 className="mb-5 text-xl font-semibold text-[#1f1e1c] sm:text-2xl">Pricing</h2>
 
               <div className="space-y-4">
                 <div>
@@ -406,7 +406,7 @@ const AddProduct = () => {
 
                 <div>
                   <label htmlFor="offer-price" className="mb-2 block text-base font-medium text-[#2a2724]">
-                    Offer price
+                    Offer price <span className="text-xs font-normal text-[#8a8079]">(optional)</span>
                   </label>
                   <div className="flex items-center overflow-hidden rounded-xl border border-[#d9cfc4] bg-white">
                     <span className="px-3 text-[#7d756f]">₹</span>
@@ -420,7 +420,7 @@ const AddProduct = () => {
                       className="w-full border-0 bg-transparent px-2 py-3 text-base text-[#2a2724] outline-none"
                     />
                   </div>
-                  <p className="mt-1 text-xs text-[#a9a09b]">Customers will see the lower price.</p>
+                  <p className="mt-1 text-xs text-[#a9a09b]">Leave blank to sell at the MRP.</p>
                 </div>
 
                 

@@ -8,8 +8,8 @@ const ProductCard = ({product, compact = false}) => {
 
     
     return product && ( 
-        <div onClick={()=> {navigate(`/products/${(Array.isArray(product.category) ? product.category[0] : product.category).toLowerCase()}/${product._id}`); scrollTo(0,0)}} className={`w-full border border-[#e5d8cc] rounded-xl bg-[var(--app-cream)] px-3 py-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${compact ? 'flex h-[315px] min-w-0 max-w-none flex-col' : 'md:px-4 min-w-56 max-w-56'}`}>
-            <div className={`group cursor-pointer flex items-center justify-center overflow-hidden rounded-lg bg-[var(--app-cream-strong)] px-2 ${compact ? 'h-36' : 'h-48'}`}>
+        <div onClick={()=> {navigate(`/products/${(Array.isArray(product.category) ? product.category[0] : product.category).toLowerCase()}/${product._id}`); scrollTo(0,0)}} className={`min-w-0 w-full border border-[#e5d8cc] rounded-xl bg-[var(--app-cream)] px-2.5 py-2.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${compact ? 'flex h-[315px] flex-col' : 'md:px-4'}`}>
+            <div className={`group flex cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-[var(--app-cream-strong)] px-2 ${compact ? 'h-32 sm:h-36' : 'h-32 sm:h-48'}`}>
                 <img className="max-h-full max-w-full object-contain transition group-hover:scale-105" src={(product.image && product.image[0]) ? product.image[0] : assets.upload_area} alt={product.name} />
             </div>
             <div className={`text-gray-500/60 ${compact ? 'flex min-h-0 flex-1 flex-col pb-2 text-xs' : 'text-sm'}`}>
@@ -22,7 +22,7 @@ const ProductCard = ({product, compact = false}) => {
                     <p>(4)</p>
                 </div>
                 <div className={`flex items-end justify-between gap-2 ${compact ? 'mt-auto pb-1 pt-3' : 'mt-3'}`}>
-                    <p className={`flex min-w-0 shrink-0 flex-row items-baseline gap-2 whitespace-nowrap font-medium text-primary ${compact ? 'text-sm' : 'md:text-xl text-base'}`}>
+                    <p className={`flex min-w-0 shrink-0 flex-row items-baseline gap-1 whitespace-nowrap font-medium text-primary ${compact ? 'text-sm' : 'text-sm sm:text-base md:text-xl'}`}>
                         <span>{currency}{product.offerPrice}</span>
                         <span className="text-xs text-gray-500/60 line-through md:text-sm">{currency}{product.price}</span>
                     </p>

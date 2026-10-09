@@ -15,16 +15,17 @@ const InputField = ({
   value,
   handleChange,
   placeholder,
+  className = "",
 }) => (
-  <div className="flex flex-col gap-1">
-    <label className="text-gray-700 text-sm font-medium">{label}</label>
+  <div className={`flex flex-col gap-1 ${className}`}>
+    <label className="text-sm font-medium text-gray-700">{label}</label>
     <input
       type={type}
       name={name}
       value={value}
       onChange={handleChange}
       placeholder={placeholder}
-      className="px-3 py-2.5 border border-gray-300 rounded-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary transition text-sm"
+      className="rounded-lg border border-gray-300 px-3 py-2 outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
       required
     />
   </div>
@@ -111,14 +112,14 @@ const AddAddress = () => {
   };
 
   return (
-    <div className="mt-16 pb-16">
-      <div className="flex flex-col-reverse md:flex-row gap-12 items-start">
+    <div className="mx-auto w-full max-w-none py-5 sm:py-7">
+      <div className="grid items-stretch gap-5 md:grid-cols-[1.1fr_0.9fr] md:gap-10">
 
         <form
           onSubmit={onSubmitHandler}
-          className="w-full max-w-xl space-y-5"
+          className="grid w-full max-w-[720px] grid-cols-1 content-center gap-x-5 gap-y-3 justify-self-center rounded-2xl border border-[#eadfd5] bg-[#fdfaf8] p-4 shadow-[0_6px_24px_rgba(25,19,15,0.05)] sm:p-5 lg:p-6"
         >
-          <div className="flex items-start gap-3 mb-2">
+          <div className="col-span-full mb-1 flex items-start gap-3">
             <div className="bg-orange-50 text-primary rounded-full p-2.5 shrink-0">
               <MapPin size={20} />
             </div>
@@ -139,9 +140,9 @@ const AddAddress = () => {
           />
 
           <div className="flex flex-col gap-1">
-            <label className="text-gray-700 text-sm font-medium">Mobile number</label>
+            <label className="text-sm font-medium text-gray-700">Mobile number</label>
             <div className="flex">
-              <span className="px-3 py-2.5 border border-gray-300 border-r-0 rounded-l-lg bg-gray-50 text-sm text-gray-600">
+              <span className="rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-600">
                 +91
               </span>
               <input
@@ -150,7 +151,7 @@ const AddAddress = () => {
                 value={address.phone}
                 onChange={handleChange}
                 placeholder="Enter mobile number"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-r-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary transition text-sm"
+                className="w-full rounded-r-lg border border-gray-300 px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                 required
               />
             </div>
@@ -172,7 +173,7 @@ const AddAddress = () => {
             placeholder="e.g., 12th Main Road, Near Apollo Pharmacy"
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="col-span-full grid grid-cols-1 gap-3 sm:grid-cols-3">
             <InputField
               label="City"
               name="city"
@@ -181,12 +182,12 @@ const AddAddress = () => {
               placeholder="Enter city"
             />
             <div className="flex flex-col gap-1">
-              <label className="text-gray-700 text-sm font-medium">State</label>
+              <label className="text-sm font-medium text-gray-700">State</label>
               <select
                 name="state"
                 value={address.state}
                 onChange={handleChange}
-                className="px-3 py-2.5 border border-gray-300 rounded-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary transition text-sm bg-white"
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                 required
               >
                 <option value="">Select state</option>
@@ -230,21 +231,21 @@ const AddAddress = () => {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-gray-700 text-sm font-medium">Address type</label>
+          <div className="col-span-full flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-gray-700">Address type</label>
             <div className="flex gap-3">
               {ADDRESS_TYPES.map(({ key, label, icon: Icon }) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setAddress((prev) => ({ ...prev, addressType: key }))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm transition ${
+                  className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition ${
                     address.addressType === key
                       ? "border-primary text-primary bg-orange-50"
                       : "border-gray-300 text-gray-600 hover:border-gray-400"
                   }`}
                 >
-                  <Icon size={16} />
+                  {React.createElement(Icon, { size: 16 })}
                   {label}
                 </button>
               ))}
@@ -256,19 +257,20 @@ const AddAddress = () => {
           {/* Button */}
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 bg-primary text-white py-3 rounded-lg mt-2 hover:opacity-90 transition cursor-pointer font-medium"
+            className="col-span-full mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary py-3 font-medium text-white transition hover:opacity-90"
           >
             <MapPin size={16} />
             Save address
           </button>
         </form>
 
-        {/* IMAGE */}
-        <img
-          src={assets.add_address_iamge}
-          alt="Add Address"
-          className="w-full md:mr-16 mb-16 md:mt-0"
-        />
+        <div className="flex min-h-[400px] w-full items-center justify-center overflow-hidden rounded-2xl md:min-h-0">
+          <img
+            src={assets.add_address_iamge}
+            alt="Delivery partner bringing an order to a customer"
+            className="h-full max-h-[680px] w-full object-contain"
+          />
+        </div>
       </div>
     </div>
   );

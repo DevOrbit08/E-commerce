@@ -21,10 +21,19 @@
 html, body, #root {
   background: var(--app-cream);
   color: #1e1b18;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 body {
   background: var(--app-cream);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 .bg-white {
@@ -41,4 +50,41 @@ body {
 
 .no-scrollbar::-webkit-scrollbar{
   display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+@media (max-width: 640px) {
+  h1, h2, h3, h4, p {
+    overflow-wrap: anywhere;
+  }
+
+  input, select, textarea, button {
+    min-height: 44px;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  .delivery-logout {
+    min-height: 0;
+  }
+
+  .stock-toggle {
+    min-height: 20px !important;
+    height: 20px !important;
+    width: 32px !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  .product-action-button {
+    min-height: 0 !important;
+    height: 24px !important;
+    padding: 0 6px !important;
+    line-height: 1 !important;
+  }
 }

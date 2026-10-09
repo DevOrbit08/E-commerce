@@ -45,31 +45,31 @@ const ProductDetails = () => {
     },[product, selectedVariant?.image])
 
     return product && (
-        <div className="mt-12">
-            <p>
+        <div className="mt-8 sm:mt-12">
+            <p className="truncate text-xs sm:text-sm">
                 <Link to={"/"}>Home</Link> /
                 <Link to="/products"> Products</Link> /
                 <Link to={`/products/${(Array.isArray(product.category) ? product.category[0] : product.category).toLowerCase()}`}> {Array.isArray(product.category) ? product.category.join(', ') : product.category}</Link> /
                 <span className="text-primary"> {product.name}</span>
             </p>
 
-            <div className="flex flex-col md:flex-row gap-16 mt-4">
-                <div className="flex gap-3">
-                    <div className="flex flex-col gap-3">
+            <div className="mt-4 flex flex-col gap-8 md:flex-row md:gap-16">
+                <div className="flex min-w-0 flex-col gap-3 sm:flex-row">
+                    <div className="order-2 flex max-w-full gap-2 overflow-x-auto sm:order-1 sm:flex-col sm:gap-3">
                         {images.map((image, index) => (
-                            <div key={index} onClick={() => setThumbnail(image)} className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded border border-gray-500/30 bg-[var(--app-cream-strong)] cursor-pointer" >
+                            <div key={index} onClick={() => setThumbnail(image)} className="flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded border border-gray-500/30 bg-[var(--app-cream-strong)] sm:h-24 sm:w-24" >
                                 <img src={image} alt={`Thumbnail ${index + 1}`} className="h-full w-full object-contain p-2" />
                             </div>
                         ))}
                     </div>
 
-                    <div className="flex h-[420px] w-[min(420px,calc(100vw-150px))] items-center justify-center overflow-hidden rounded border border-gray-500/30 bg-[var(--app-cream-strong)]">
+                    <div className="order-1 flex aspect-square h-auto w-full max-w-[420px] items-center justify-center overflow-hidden rounded border border-gray-500/30 bg-[var(--app-cream-strong)] sm:order-2 sm:h-[420px] sm:w-[min(420px,calc(100vw-150px))]">
                         <img src={thumbnail} alt="Selected product" className="h-full w-full object-contain p-5" />
                     </div>
                 </div>
 
-                <div className="text-sm w-full md:w-1/2">
-                    <h1 className="text-3xl font-medium">{product.name}</h1>
+                <div className="w-full text-sm md:w-1/2">
+                    <h1 className="text-2xl font-medium sm:text-3xl">{product.name}</h1>
 
                     <div className="flex items-center gap-0.5 mt-1">
                         {Array(5).fill('').map((_, i) => (
@@ -118,7 +118,7 @@ const ProductDetails = () => {
                         ))}
                     </ul>
 
-                    <div className="flex items-center mt-10 gap-4 text-base">
+                    <div className="mt-8 flex items-center gap-2 text-sm sm:mt-10 sm:gap-4 sm:text-base">
                         <button disabled={!selectedVariant?.inStock} onClick={()=> addToCart(product._id)} className="w-full py-3.5 cursor-pointer font-medium bg-gray-100 text-gray-800/80 hover:bg-gray-200 transition disabled:cursor-not-allowed disabled:opacity-50" >
                             Add to Cart
                         </button>
@@ -133,7 +133,7 @@ const ProductDetails = () => {
            {/*--Related Product--*/}
             <div className="flex flex-col items-center mt-20">
               <div className="flex flex-col items-center w-max">
-                <p className="text-3xl font-medium">Related product</p>
+                <p className="text-2xl font-medium sm:text-3xl">Related product</p>
                 <div className="w-20 h-0.5 bg-primary rounded-full mt-2"></div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-6 lg:grid-cols-5 mt-6 w-full">

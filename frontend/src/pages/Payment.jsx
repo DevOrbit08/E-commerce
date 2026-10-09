@@ -38,9 +38,9 @@ const Payment = () => {
 
   return (
     <div className="mt-16 px-6">
-      <div className="max-w-[1150px] mx-auto grid grid-cols-12 gap-6">
+      <div className="mx-auto grid max-w-[1150px] grid-cols-1 gap-6 lg:grid-cols-12">
         {/* left column - options */}
-        <aside className="col-span-4 bg-white rounded-lg border shadow-sm overflow-hidden">
+        <aside className="overflow-hidden rounded-lg border bg-white shadow-sm lg:col-span-4">
           <div className="px-5 py-4 border-b">
             <button onClick={() => navigate(-1)} className="text-sm text-gray-600">← Back</button>
             <h2 className="mt-2 text-xl font-semibold">Complete Payment</h2>
@@ -74,7 +74,7 @@ const Payment = () => {
         </aside>
 
         {/* center column - QR / payment card */}
-        <main className="col-span-5 bg-white rounded-lg border shadow-sm p-6 flex flex-col items-center">
+        <main className="flex flex-col items-center rounded-lg border bg-white p-4 shadow-sm sm:p-6 lg:col-span-5">
           {method === 'COD' ? (
             <div className="text-center w-full">
               <h3 className="text-xl font-semibold mb-2">Cash on Delivery</h3>
@@ -120,7 +120,7 @@ const Payment = () => {
         </main>
 
         {/* right column - order summary */}
-        <aside className="col-span-3 bg-white rounded-lg border shadow-sm p-5">
+        <aside className="rounded-lg border bg-white p-5 shadow-sm lg:col-span-3">
           <div className="flex items-center justify-between">
             <h4 className="font-semibold">Price Details</h4>
             <div className="text-sm text-gray-500">100% Secure</div>

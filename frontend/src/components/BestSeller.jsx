@@ -26,9 +26,9 @@ const BestSeller = () => {
 
     return (
       <div className="overflow-hidden">
-        <div className={`flex w-max gap-5 py-1 ${reverse ? 'featured-marquee-reverse' : 'featured-marquee'}`}>
+        <div className={`flex w-max gap-3 py-1 sm:gap-5 ${reverse ? 'featured-marquee-reverse' : 'featured-marquee'}`}>
           {repeatedProducts.map((product, index) => (
-            <div key={`${product._id}-${index}`} className="w-52 shrink-0 sm:w-56 md:w-60">
+            <div key={`${product._id}-${index}`} className="w-[min(44vw,208px)] shrink-0 sm:w-56 md:w-60">
               <ProductCard product={product} compact />
             </div>
           ))}
@@ -38,9 +38,9 @@ const BestSeller = () => {
   };
 
   return (
-    <div className="mt-16">
+    <div className="mt-10 sm:mt-16">
       <div className="mb-6">
-        <p className="text-2xl font-medium md:text-3xl">Featured Products</p>
+        <p className="text-xl font-medium sm:text-2xl md:text-3xl">Featured Products</p>
         <p className="mt-1 text-sm text-gray-500">Popular picks purchased by our customers</p>
       </div>
 

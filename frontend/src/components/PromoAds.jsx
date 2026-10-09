@@ -12,12 +12,12 @@ const ads = [
 ]
 
 const PromoAds = () => (
-  <section className="mt-10" aria-label="Promotional offers">
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <section className="mt-8 sm:mt-10" aria-label="Promotional offers">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
       {ads.map((ad) => (
         <div
           key={ad.alt}
-          className="aspect-[2.5/1] overflow-hidden rounded-2xl bg-[#efe5dc] shadow-sm"
+          className="aspect-[1.45/1] overflow-hidden rounded-xl bg-[#efe5dc] shadow-sm sm:aspect-[2.5/1] sm:rounded-2xl"
         >
           <img src={ad.image} alt={ad.alt} className="h-full w-full object-cover" />
         </div>

@@ -33,6 +33,12 @@ const StatCard = ({
   caption,
   tone = 'default',
 }) => {
+  const shortLabels = {
+    'Total products': 'Total',
+    'In stock': 'Stock',
+    'Out of stock': 'Out',
+    Categories: 'Categories',
+  }
   const toneMap = {
     default: {
       bg: '#fff1ec',
@@ -51,10 +57,10 @@ const StatCard = ({
   const colors = toneMap[tone] || toneMap.default
 
   return (
-    <div className="rounded-[18px] border border-[#eadfd5] bg-[#fdfaf8] p-4 shadow-[0_6px_24px_rgba(25,19,15,0.03)]">
-      <div className="flex items-center gap-3">
+    <div className="min-w-0 rounded-lg border border-[#eadfd5] bg-[#fdfaf8] p-1.5 shadow-[0_6px_24px_rgba(25,19,15,0.03)] sm:rounded-2xl sm:p-4">
+      <div className="flex min-w-0 flex-col items-center gap-0.5 text-center sm:flex-row sm:gap-3 sm:text-left">
         <div
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-lg"
+          className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[7px] sm:h-11 sm:w-11 sm:text-lg"
           style={{
             background: colors.bg,
             color: colors.fg,
@@ -63,16 +69,17 @@ const StatCard = ({
           {icon}
         </div>
 
-        <div>
-          <p className="text-sm text-[#8a8079]">{label}</p>
+        <div className="min-w-0 max-w-full">
+          <p className="truncate text-[8px] leading-tight text-[#8a8079] sm:hidden">{shortLabels[label] || label}</p>
+          <p className="hidden truncate text-sm leading-tight text-[#8a8079] sm:block">{label}</p>
 
-          <p className="text-2xl font-semibold text-[#1f1e1c]">
+          <p className="truncate text-sm font-semibold leading-tight text-[#1f1e1c] sm:text-2xl">
             {value}
           </p>
         </div>
       </div>
 
-      <p className="mt-2 text-xs text-[#a9a09b]">
+      <p className="mt-1 hidden text-xs text-[#a9a09b] sm:block">
         {caption}
       </p>
     </div>
@@ -434,35 +441,36 @@ const ProductList = () => {
           await fetchProducts()
         }
 
-        const toggleVariantStock = async (product, variant) => {
-          try {
-            setLoadingId(`${product._id}-${variant.unit}`)
-            const quantity = variant.inStock ? 0 : (Number(variant.quantity) > 0 ? Number(variant.quantity) : 1)
-            const response = await fetch(`${API_URL}/api/product/stock`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ id: product._id, variantUnit: variant.unit, quantity }),
-            })
-            const data = await response.json()
-            if (data?.success) {
-              toast.success(`${variant.unit} marked ${variant.inStock ? 'out of' : 'in'} stock`)
-              if (fetchProducts) await fetchProducts()
-            } else {
-              toast.error(data?.message || 'Failed to update variant stock')
-            }
-          } catch (error) {
-            console.error(error)
-            toast.error('Network error while updating variant stock')
-          } finally {
-            setLoadingId(null)
-          }
-        }
       } else {
         toast.error(
           data?.message ||
             'Failed to update stock'
         )
+      }
+
+      const toggleVariantStock = async (product, variant) => {
+        try {
+          setLoadingId(`${product._id}-${variant.unit}`)
+          const quantity = variant.inStock ? 0 : (Number(variant.quantity) > 0 ? Number(variant.quantity) : 1)
+          const response = await fetch(`${API_URL}/api/product/stock`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id: product._id, variantUnit: variant.unit, quantity }),
+          })
+          const data = await response.json()
+          if (data?.success) {
+            toast.success(`${variant.unit} marked ${variant.inStock ? 'out of' : 'in'} stock`)
+            if (fetchProducts) await fetchProducts()
+          } else {
+            toast.error(data?.message || 'Failed to update variant stock')
+          }
+        } catch (error) {
+          console.error(error)
+          toast.error('Network error while updating variant stock')
+        } finally {
+          setLoadingId(null)
+        }
       }
     } catch (error) {
       console.error(error)
@@ -532,11 +540,11 @@ const ProductList = () => {
   }
 
   return (
-    <div className="no-scrollbar h-[95vh] flex-1 overflow-y-scroll bg-[#fbf7f0]">
-      <div className="mx-auto w-full max-w-[1400px] p-4 md:p-10">
+    <div className="no-scrollbar min-w-0 max-w-full flex-1 overflow-x-hidden overflow-y-auto bg-[#fbf7f0]">
+      <div className="mx-auto w-full max-w-[1400px] min-w-0 p-2.5 sm:p-5 md:p-10">
         {/* Page Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-semibold text-[#1f1e1c]">
+          <h1 className="text-2xl font-semibold text-[#1f1e1c] sm:text-3xl">
             Products
           </h1>
 
@@ -547,7 +555,7 @@ const ProductList = () => {
         </div>
 
         {/* Statistics */}
-        <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-3 grid grid-cols-4 gap-1 sm:mb-6 sm:gap-4">
           <StatCard
             icon="🛍️"
             label="Total products"
@@ -580,8 +588,8 @@ const ProductList = () => {
         </div>
 
         {/* Search and Filters */}
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <div className="relative min-w-[220px] flex-1">
+        <div className="mb-3 flex flex-col items-stretch gap-2 sm:mb-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+          <div className="relative min-w-0 flex-1">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#a9a09b]">
               🔍
             </span>
@@ -593,8 +601,8 @@ const ProductList = () => {
                 setSearch(event.target.value)
                 setPage(1)
               }}
-              placeholder="Search products, SKU or brand..."
-              className="w-full rounded-xl border border-[#d9cfc4] bg-white py-2.5 pl-10 pr-4 text-sm text-[#2a2724] outline-none transition focus:border-[#f1683a]"
+              placeholder="Search products..."
+              className="w-full min-w-0 rounded-xl border border-[#d9cfc4] bg-white py-2.5 pl-10 pr-2 text-xs text-[#2a2724] outline-none transition placeholder:text-[#8a8079] focus:border-[#f1683a] sm:pr-4 sm:text-sm"
             />
           </div>
 
@@ -607,7 +615,7 @@ const ProductList = () => {
 
               setPage(1)
             }}
-            className="rounded-xl border border-[#d9cfc4] bg-white px-4 py-2.5 text-sm text-[#2a2724] outline-none transition focus:border-[#f1683a]"
+            className="w-full rounded-xl border border-[#d9cfc4] bg-white px-4 py-2.5 text-sm text-[#2a2724] outline-none transition focus:border-[#f1683a] sm:w-auto"
           >
             <option value="all">
               All categories
@@ -630,15 +638,63 @@ const ProductList = () => {
             onClick={() =>
               navigate(ADD_PRODUCT_ROUTE)
             }
-            className="ml-auto inline-flex items-center gap-2 rounded-xl bg-[#f1683a] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(241,104,58,0.25)] transition hover:bg-[#e95d2f]"
+            className="inline-flex w-fit self-end items-center justify-center gap-1.5 rounded-lg bg-[#f1683a] px-3 py-2 text-xs font-semibold text-white shadow-[0_8px_16px_rgba(241,104,58,0.22)] transition hover:bg-[#e95d2f] sm:ml-auto sm:self-auto sm:gap-2 sm:rounded-xl sm:px-4 sm:py-2.5 sm:text-sm"
           >
             <span>+</span>
             Add product
           </button>
         </div>
 
-        {/* Products Table */}
-        <div className="overflow-x-auto rounded-[18px] border border-[#eadfd5] bg-white">
+        {/* Mobile product cards */}
+        <div className="space-y-3 md:hidden">
+          {paginated.map((product) => (
+            <article key={product._id} className="rounded-xl border border-[#eadfd5] bg-white p-2.5 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-[#eadfd5] bg-[#f6f0ec]">
+                  <img src={product.image?.[0] || assets.upload_area} alt={product.name} className="h-full w-full object-cover" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="line-clamp-2 text-[13px] font-semibold leading-5 text-[#2a2724]">{product.name}</h2>
+                  <p className="mt-1 truncate text-xs text-[#8a8079]">{Array.isArray(product.category) ? product.category.join(', ') : product.category}</p>
+                  {product.sku && <p className="mt-1 text-[11px] text-[#a9a09b]">SKU: {product.sku}</p>}
+                </div>
+              </div>
+              <div className="mt-2.5 grid grid-cols-3 gap-1.5 rounded-lg bg-[#fdfaf8] p-2 text-[11px]">
+                <div><p className="text-[#8a8079]">MRP</p><p className="mt-0.5 font-semibold text-[#2a2724]">{currency}{product.price}</p></div>
+                <div><p className="text-[#8a8079]">Offer price</p><p className="mt-0.5 font-semibold text-primary">{currency}{product.offerPrice}</p></div>
+                <div className="min-w-0">
+                  <p className="truncate text-[#8a8079]">Stock</p>
+                  {Array.isArray(product.variants) && product.variants.length ? (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                    {product.variants.map((variant) => (
+                      <button key={variant.unit} type="button" onClick={() => toggleVariantStock(product, variant)} disabled={loadingId === `${product._id}-${variant.unit}`} className={`rounded-md border px-1.5 py-0.5 text-[9px] font-medium disabled:opacity-60 ${variant.inStock ? 'border-[#b8e8cd] bg-[#e8f7ef] text-[#218b52]' : 'border-[#e0d6cf] bg-[#f3eeea] text-[#8a8079]'}`}>
+                        {variant.unit}: {variant.inStock ? 'On' : 'Off'}
+                      </button>
+                    ))}
+                    </div>
+                  ) : (
+                    <div className="mt-1 flex items-center gap-1.5">
+                    <button type="button" aria-label="Toggle stock status" onClick={() => toggleStock(product)} disabled={loadingId === product._id} className={`stock-toggle relative block h-5 w-8 min-h-0 shrink-0 rounded-full p-0 transition disabled:opacity-60 ${product.inStock ? 'bg-[#f1683a]' : 'bg-[#d8cfc8]'}`}>
+                      <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition ${product.inStock ? 'left-3.5' : 'left-0.5'}`} />
+                    </button>
+                    <span className={`text-[9px] font-medium ${product.inStock ? 'text-[#218b52]' : 'text-[#8a8079]'}`}>
+                      {product.inStock ? 'On' : 'Off'}
+                    </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="mt-2.5 flex gap-2 border-t border-[#eee3d8] pt-2.5">
+                <button type="button" onClick={() => startEdit(product)} className="product-action-button min-h-0 flex-1 rounded border border-[#d9cfc4] px-1.5 py-0.5 text-[9px] font-medium leading-4 text-[#2a2724]">Edit</button>
+                <button type="button" disabled={loadingId === product._id} onClick={() => deleteProduct(product)} className="product-action-button min-h-0 flex-1 rounded border border-[#f3c9c9] bg-[#fdecec] px-1.5 py-0.5 text-[9px] font-medium leading-4 text-[#d33] disabled:opacity-60">Delete</button>
+              </div>
+            </article>
+          ))}
+          {paginated.length === 0 && <div className="rounded-2xl border border-dashed border-[#eadfd5] bg-white px-4 py-10 text-center text-sm text-[#a9a09b]">No products match your filters.</div>}
+        </div>
+
+        {/* Desktop product table */}
+        <div className="hidden overflow-x-auto rounded-[18px] border border-[#eadfd5] bg-white md:block">
           <table className="w-full min-w-[760px] table-fixed">
             <thead className="bg-[#fdfaf8] text-left text-sm text-[#5a514d]">
               <tr>
@@ -943,7 +999,7 @@ const ProductList = () => {
               }
             }}
           >
-            <div className="max-h-[95vh] w-full max-w-2xl overflow-y-auto rounded-[22px] border border-[#eadfd5] bg-[#fffaf5] p-6 shadow-[0_24px_70px_rgba(31,30,28,0.22)] md:p-7">
+            <div className="max-h-[95vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[#eadfd5] bg-[#fffaf5] p-4 shadow-[0_24px_70px_rgba(31,30,28,0.22)] sm:p-6 md:p-7">
               {/* Modal Header */}
               <div className="mb-5 flex items-start justify-between border-b border-[#eadfd5] pb-4">
                 <div>

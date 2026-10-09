@@ -96,12 +96,12 @@ const DeliveryPartners = () => {
   }
 
   return (
-    <main className="min-w-0 flex-1 overflow-y-auto p-5 md:p-10">
+    <main className="min-w-0 flex-1 overflow-y-auto p-3 sm:p-5 md:p-10">
       <div className="mb-7">
-        <h1 className="text-3xl font-semibold text-[#1f1e1c]">Delivery Partners</h1>
+        <h1 className="text-2xl font-semibold text-[#1f1e1c] sm:text-3xl">Delivery Partners</h1>
         <p className="mt-1 text-[#8a8079]">Add and manage delivery partners for your orders.</p>
       </div>
-      <form onSubmit={addPartner} className="mb-8 grid gap-3 rounded-2xl border border-[#eadfd5] bg-[#fdfaf8] p-5 md:grid-cols-2 xl:grid-cols-4">
+      <form onSubmit={addPartner} className="mb-6 grid gap-2.5 rounded-2xl border border-[#eadfd5] bg-[#fdfaf8] p-3 sm:mb-8 sm:gap-3 sm:p-5 md:grid-cols-2 xl:grid-cols-4">
         {[
           ['name', 'Full name', true],
           ['phone', 'Phone number', true],
@@ -115,7 +115,7 @@ const DeliveryPartners = () => {
       </form>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {partners.map((partner) => (
-          <div key={partner._id} className="rounded-2xl border border-[#eadfd5] bg-[#fdfaf8] p-5">
+          <div key={partner._id} className="rounded-2xl border border-[#eadfd5] bg-[#fdfaf8] p-4 sm:p-5">
             <div className="flex items-center gap-3"><Truck className="text-primary" /><h2 className="font-semibold text-[#2a2724]">{partner.name}</h2></div>
             <p className="mt-4 text-sm text-[#5f5751]">{partner.phone}</p>
             <p className="text-sm text-[#8a8079]">{partner.email || 'No email provided'}</p>

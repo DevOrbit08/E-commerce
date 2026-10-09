@@ -36,7 +36,6 @@ const Cart = () => {
     getCartCount,
     updateCartItem,
     navigate,
-    getCartAmount,
     clearCart,
   } = useAppContext();
 
@@ -85,10 +84,17 @@ const Cart = () => {
     }
   }, [products, cartItems]);
 
-  const subtotal = getCartAmount();
+  const mrpTotal = cartArray.reduce(
+    (total, product) => total + Number(product.price || product.offerPrice || 0) * (cartItems[product._id] || 0),
+    0
+  );
+  const offerTotal = cartArray.reduce(
+    (total, product) => total + Number(product.offerPrice || product.price || 0) * (cartItems[product._id] || 0),
+    0
+  );
+  const amountSaved = Math.max(0, mrpTotal - offerTotal);
   const deliveryFee = 0;
-  const tax = subtotal * 0.02;
-  const totalAmount = subtotal + deliveryFee + tax;
+  const totalAmount = offerTotal + deliveryFee;
 
   const stopScanner = () => {
     if (scannerStreamRef.current) {
@@ -100,7 +106,7 @@ const Cart = () => {
 
   const PlaceOrder = async () => {
     if (!selectedAddress) {
-      toast.error("Please select a delivery address");
+      navigate("/add-address");
       return;
     }
 
@@ -214,9 +220,9 @@ const Cart = () => {
   }
 
   return (
-    <div className="w-full px-4 pb-16 pt-6">
+    <div className="w-full px-0 pb-16 pt-6 sm:px-4">
       <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
-        <div className="rounded-[22px] border border-[#ecdccf] bg-[#f7f3ef] p-5 shadow-[0_10px_25px_rgba(0,0,0,0.02)]">
+        <div className="rounded-[22px] border border-[#ecdccf] bg-[#f7f3ef] p-3 shadow-[0_10px_25px_rgba(0,0,0,0.02)] sm:p-5">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <h2 className="text-[26px] font-semibold text-[#1f1e1c]">Your basket</h2>
@@ -226,15 +232,15 @@ const Cart = () => {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="max-h-[min(720px,70vh)] space-y-4 overflow-y-auto overscroll-contain pr-2">
             {cartArray.map((product) => {
               const currentQty = cartItems[product._id] || 0;
               const unitPrice = Number(product.offerPrice || product.price || 0);
               const lineTotal = unitPrice * currentQty;
 
               return (
-                <div key={product._id} onClick={() => { navigate(`/products/${(Array.isArray(product.category) ? product.category[0] : product.category).toLowerCase()}/${product._id}`); window.scrollTo(0, 0) }} className="flex cursor-pointer items-center gap-4 rounded-[20px] border border-[#ebddd2] bg-white p-3 shadow-[0_8px_20px_rgba(0,0,0,0.02)] transition hover:shadow-md">
-                  <div className="flex h-[104px] w-[104px] items-center justify-center overflow-hidden rounded-[16px] bg-[#f6efe9] p-2">
+                <div key={product._id} onClick={() => { navigate(`/products/${(Array.isArray(product.category) ? product.category[0] : product.category).toLowerCase()}/${product._id}`); window.scrollTo(0, 0) }} className="flex cursor-pointer items-center gap-3 rounded-[20px] border border-[#ebddd2] bg-white p-2.5 shadow-[0_8px_20px_rgba(0,0,0,0.02)] transition hover:shadow-md sm:gap-4 sm:p-3">
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[16px] bg-[#f6efe9] p-2 sm:h-[104px] sm:w-[104px]">
                     <img
                       src={(product.image && product.image[0]) ? product.image[0] : assets.upload_area}
                       alt={product.name}
@@ -457,16 +463,20 @@ const Cart = () => {
           <div className="rounded-[16px] border border-[#e9dccf] bg-[#fffefb] p-3">
             <div className="space-y-3 text-sm text-[#5e5853]">
               <div className="flex items-center justify-between">
-                <span>Item total</span>
-                <span className="font-semibold text-[#2a2724]">{currency}{subtotal.toFixed(2)}</span>
+                <span>MRP price</span>
+                <span className="font-semibold text-[#2a2724]">{currency}{mrpTotal.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Amount you save</span>
+                <span className="font-semibold text-green-700">−{currency}{amountSaved.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Offer price</span>
+                <span className="font-semibold text-[#2a2724]">{currency}{offerTotal.toFixed(2)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Delivery fee</span>
-                <span className="font-semibold text-[#2a2724]">{deliveryFee === 0 ? "FREE" : `${currency}${deliveryFee.toFixed(2)}`}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Tax (2%)</span>
-                <span className="font-semibold text-[#2a2724]">{currency}{tax.toFixed(2)}</span>
+                <span className="font-bold text-[#2a2724]">{deliveryFee === 0 ? "FREE" : `${currency}${deliveryFee.toFixed(2)}`}</span>
               </div>
             </div>
 

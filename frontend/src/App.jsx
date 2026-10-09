@@ -38,7 +38,8 @@ const App = () => {
 
       <Toaster />
 
-      <div className={`${isSellerPath ? "" : "px-6 md:px-16 lg:px-24 xl:px-32"}`}>
+      {!isSellerPath && <div aria-hidden="true" className="h-[66px] sm:h-[68px]" />}
+      <div className={`${isSellerPath ? "" : "min-w-0 px-3 sm:px-5 md:px-8 lg:px-10 xl:px-12"}`}>
         <Routes>
 
           <Route path='/' element={<Home/>}/>

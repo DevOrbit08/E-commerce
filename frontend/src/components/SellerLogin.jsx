@@ -52,21 +52,21 @@ const SellerLogin = () => {
   },[isSeller, navigate, setIsSeller])
 
   return !isSeller && (
-    <form onSubmit={onSubmitHandler} className='min-h-screen flex items-center text-sm text-gray-600'>
+    <form onSubmit={onSubmitHandler} className='flex min-h-screen items-center px-4 text-sm text-gray-600'>
 
-       <div className='flex flex-col gap-5 m-auto items-start p-8 py-12 min-w-80 sm:min-w-88 rounsed-lg shadow-xl border border-gray-200'>
-        <p className='text-2xl font-medium m-auto'><span className='text-primary'>Seller</span> Login</p>
+       <div className='mx-auto flex w-full max-w-md flex-col items-start gap-5 rounded-lg border border-gray-200 p-6 py-10 shadow-xl sm:p-8 sm:py-12'>
+        <p className='m-auto text-xl font-medium sm:text-2xl'><span className='text-primary'>Seller</span> Login</p>
         <div className='w-full'>
           <p>Email / Phone Number</p>
           <input onChange={(e)=>setIdentifier(e.target.value)} value={identifier}
           type="text" placeholder="Enter your email or phone number"
-          className="border border-gray-200 rounded w-full p-2 mt-1 outline-primary"/>
+          className="mt-1 w-full rounded border border-gray-200 p-3 outline-primary"/>
         </div>
         <div className='w-full'>
           <p>Password</p>
           <input onChange={(e)=>setPassword(e.target.value)} value={password}
           type="password"  placeholder="Enter Your Password"
-           className="border border-gray-200 rounded w-full p-2 mt-1 outline-primary"/>
+           className="mt-1 w-full rounded border border-gray-200 p-3 outline-primary"/>
         </div>
         <button className="bg-primary tetx-white w-full py-2 rounded-md cursor-pointer">Login</button>
        </div>

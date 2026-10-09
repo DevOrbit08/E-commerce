@@ -5,8 +5,8 @@ import { PRODUCT_CATEGORIES } from "../constants/productCategories";
 
 const Footer = () => {
     return (
-        <footer className="px-6 pt-8 md:px-16 lg:px-36 w-full text-gray-500 mt-24 bg-primary/10">
-            <div className="flex flex-col md:flex-row justify-between w-full gap-10 border-b border-gray-500 pb-10">
+        <footer className="mt-16 w-full px-3 pt-8 text-gray-500 sm:px-5 sm:pt-10 md:mt-24 md:px-8 lg:px-10 xl:px-12">
+            <div className="flex w-full flex-col gap-8 border-b border-gray-500 pb-8 md:flex-row md:justify-between md:gap-10 md:pb-10">
                 <div className="md:max-w-96">
                     <img alt="logo" className="h-14" src={assets.logo} />
                     <p className="mt-6 text-sm">
@@ -18,7 +18,7 @@ const Footer = () => {
                         <img src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/refs/heads/main/assets/appDownload/appleStoreBtnBlack.svg" alt="app store" className="h-10 w-auto border border-white rounded" />
                     </div>
                 </div>
-                <div className="grid flex-1 grid-cols-2 gap-8 md:grid-cols-[160px_minmax(0,1fr)_180px] md:gap-10">
+                <div className="grid flex-1 grid-cols-2 gap-6 sm:gap-8 md:grid-cols-[160px_minmax(0,1fr)_180px] md:gap-10">
                     <div>
                         <h2 className="mb-5 font-semibold text-black">Shop</h2>
                         <ul className="text-sm space-y-2">

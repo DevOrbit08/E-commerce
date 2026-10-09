@@ -1,99 +1,184 @@
-import React from 'react'
-import { useAppContext } from '../context/AppContext'
+import React from 'react';
+import { Leaf, LockKeyhole, Mail, Phone, UserRound, X } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+const AuthField = ({ icon: Icon, ...inputProps }) => (
+  <label className="flex h-12 w-full items-center gap-3 rounded-xl border border-gray-700 bg-gray-800/80 px-4 text-gray-400 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+    {React.createElement(Icon, { size: 17, strokeWidth: 1.8, 'aria-hidden': true })}
+    <input
+      {...inputProps}
+      className="h-full min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-gray-400"
+      required
+    />
+  </label>
+);
+
 const Login = () => {
+  const { setShowUserLogin, setUser } = useAppContext();
+  const [state, setState] = React.useState('login');
+  const [formData, setFormData] = React.useState({
+    name: '',
+    identifier: '',
+    email: '',
+    phone: '',
+    password: '',
+  });
 
-  const {setShowUserLogin, setUser} = useAppContext() 
- 
-   const [state, setState] = React.useState("login")
-
-    const [formData, setFormData] = React.useState({
-        name: '',
-        identifier: '',
-        password: ''
-    })
-
-    const onSubmitHandler = async (event)=>{
-      event.preventDefault();
-      const url = state === 'login' ? `${API_URL}/api/user/login` : `${API_URL}/api/user/register`;
-      try {
-        const payload = state === 'login' ? { identifier: formData.identifier, password: formData.password } : { name: formData.name, identifier: formData.identifier, password: formData.password };
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (data && data.success) {
-          setUser(data.user);
-          setShowUserLogin(false);
-          toast.success(state === 'login' ? 'Logged in' : 'Registered');
-        } else {
-          // fallback to alert if toast unavailable
-          const msg = (data && data.message) ? data.message : 'Authentication failed';
-          toast.error(msg);
-        }
-      } catch (error) {
-        toast.error(error.message);
+  const onSubmitHandler = async (event) => {
+    event.preventDefault();
+    const url = state === 'login' ? `${API_URL}/api/user/login` : `${API_URL}/api/user/register`;
+    try {
+      const payload = state === 'login'
+        ? { identifier: formData.identifier, password: formData.password }
+        : { name: formData.name, email: formData.email, phone: formData.phone, password: formData.password };
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data?.success) {
+        setUser(data.user);
+        setShowUserLogin(false);
+        toast.success(state === 'login' ? 'Logged in' : 'Registered');
+      } else {
+        toast.error(data?.message || 'Authentication failed');
       }
+    } catch (error) {
+      toast.error(error.message);
     }
+  };
 
-    
-    const handleChange = (e) => {
-        const { name, value } = e.target
-        setFormData(prev => ({ ...prev, [name]: value }))
-    }
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
+  };
+
+  const isLogin = state === 'login';
 
   return (
-    <div onClick={()=> setShowUserLogin(false)} className='fixed top-0 bottom-0 left-0 right-0 z-30 flex items-center justify-center text-sm text-gray-600 bg-black/50'>
-      <form onClick={(e)=>e.stopPropagation()}
-            onSubmit={onSubmitHandler}
-            
-            className="sm:w-87.5 w-full text-center bg-gray-900 border border-gray-800 rounded-2xl px-8">
-            <h1 className="text-white text-3xl mt-10 font-medium">
-                {state === "login" ? "Login" : "Sign up"}
-            </h1>
+    <div
+      onClick={() => setShowUserLogin(false)}
+      className="fixed inset-0 z-30 flex items-center justify-center overflow-y-auto bg-gray-950/60 px-4 py-5 backdrop-blur-sm"
+    >
+      <form
+        onClick={(event) => event.stopPropagation()}
+        onSubmit={onSubmitHandler}
+        aria-label={isLogin ? 'Log in to Greencart' : 'Create a Greencart account'}
+        className={`relative my-auto flex w-full flex-col justify-center overflow-hidden rounded-3xl border border-white/10 bg-gray-900 px-6 py-7 text-center shadow-2xl shadow-black/30 sm:aspect-square ${
+          isLogin
+            ? 'sm:w-[min(100%,520px,calc(100dvh-2rem))]'
+            : 'sm:w-[min(100%,640px,calc(100dvh-2rem))]'
+        } sm:px-10 sm:py-7`}
+      >
+        <button
+          type="button"
+          onClick={() => setShowUserLogin(false)}
+          aria-label="Close sign in form"
+          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition hover:bg-white/10 hover:text-white"
+        >
+          <X size={18} />
+        </button>
 
-            <p className="text-gray-400 text-sm mt-2">Please sign in to continue</p>
+        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+          <Leaf size={22} strokeWidth={1.8} />
+        </div>
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+          {isLogin ? 'Welcome back' : 'Create your account'}
+        </h1>
+        <p className="mt-2 text-sm leading-5 text-gray-400">
+          {isLogin ? 'Sign in to continue shopping' : 'Join Greencart for fresh picks and easy shopping'}
+        </p>
 
-            {state !== "login" && (
-                <div className="flex items-center mt-6 w-full bg-gray-800 border border-gray-700 h-12 rounded-full overflow-hidden pl-6 gap-2 ">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-gray-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <circle cx="12" cy="8" r="5" /> <path d="M20 21a8 8 0 0 0-16 0" /> </svg>
-                    <input type="text" name="name" placeholder="Name" className="w-full bg-transparent text-white placeholder-gray-400 border-none outline-none " value={formData.name} onChange={handleChange} required />
-                </div>
-            )}
+        <div className="mt-7 grid grid-cols-1 gap-3">
+          {!isLogin && (
+            <AuthField
+              icon={UserRound}
+              type="text"
+              name="name"
+              placeholder="Full name"
+              autoComplete="name"
+              value={formData.name}
+              onChange={handleChange}
+            />
+          )}
 
-            <div className="flex items-center w-full mt-4 bg-gray-800 border border-gray-700 h-12 rounded-full overflow-hidden pl-6 gap-2 ">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-gray-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /> <rect x="2" y="4" width="20" height="16" rx="2" /> </svg>
-                <input type="text" name="identifier" placeholder="Email / Phone number" className="w-full bg-transparent text-white placeholder-gray-400 border-none outline-none " value={formData.identifier} onChange={handleChange} required />
-            </div>
+          {isLogin ? (
+            <AuthField
+              icon={Mail}
+              type="text"
+              name="identifier"
+              placeholder="Email or phone number"
+              autoComplete="username"
+              value={formData.identifier}
+              onChange={handleChange}
+            />
+          ) : (
+            <>
+              <AuthField
+                icon={Mail}
+                type="email"
+                name="email"
+                placeholder="Email address"
+                autoComplete="email"
+                value={formData.email}
+                onChange={handleChange}
+              />
+              <AuthField
+                icon={Phone}
+                type="tel"
+                name="phone"
+                placeholder="Phone number"
+                autoComplete="tel"
+                value={formData.phone}
+                onChange={handleChange}
+              />
+            </>
+          )}
 
-            <div className=" flex items-center mt-4 w-full bg-gray-800 border border-gray-700 h-12 rounded-full overflow-hidden pl-6 gap-2 ">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-gray-400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /> </svg>
-                <input type="password" name="password" placeholder="Password" className="w-full bg-transparent text-white placeholder-gray-400 border-none outline-none" value={formData.password} onChange={handleChange} required />
-            </div>
+          <AuthField
+            icon={LockKeyhole}
+            type="password"
+            name="password"
+            placeholder="Password"
+            autoComplete={isLogin ? 'current-password' : 'new-password'}
+            value={formData.password}
+            onChange={handleChange}
+          />
+        </div>
 
-            <div className="mt-4 text-left">
-                <button className="text-sm text-primary hover:underline">
-                    Forget password?
-                </button>
-            </div>
-
-            <button type="submit" className="mt-2 w-full h-11 rounded-full text-white bg-primary hover:bg-primary-dull cursor-pointer transition " >
-                {state === "login" ? "Login" : "Sign up"}
+        {isLogin && (
+          <div className="mt-4 text-left">
+            <button type="button" className="text-sm font-medium text-primary transition hover:text-orange-300">
+              Forgot password?
             </button>
+          </div>
+        )}
 
-            <p onClick={() => setState(prev => prev === "login" ? "register" : "login") } className="text-gray-400 text-sm mt-3 mb-11 cursor-pointer" >
-                {state === "login" ? "Don't have an account?" : "Already have an account?"}
-                <span className="text-primary hover:underline ml-1">click here</span>
-            </p>
-        </form>
+        <button
+          type="submit"
+          className="mt-5 flex h-14 w-full max-w-[360px] shrink-0 cursor-pointer items-center justify-center self-center rounded-xl bg-primary px-6 text-base font-semibold leading-none text-white shadow-lg shadow-primary/25 transition-colors hover:bg-primary-dull focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+        >
+          {isLogin ? 'Log in' : 'Create account'}
+        </button>
+
+        <p className="mt-5 text-sm text-gray-400">
+          {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+          <button
+            type="button"
+            onClick={() => setState((previous) => previous === 'login' ? 'register' : 'login')}
+            className="font-semibold text-primary transition hover:text-orange-300"
+          >
+            {isLogin ? 'Sign up' : 'Log in'}
+          </button>
+        </p>
+      </form>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

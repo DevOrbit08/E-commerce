@@ -10,6 +10,7 @@ const orderSchema = new mongoose.Schema({
         amount: {type: Number, required: true},
         address: {type: mongoose.Schema.Types.ObjectId, required: true, ref: 'address'},
         status: {type: String, default: 'Order Placed'},
+        deliveredBy: {type: mongoose.Schema.Types.ObjectId, ref: 'deliveryPartner', default: null},
         paymentType: {type: String, required: true},
         isPaid: {type: Boolean, required: true, default: false},
 }, {timestamps: true});

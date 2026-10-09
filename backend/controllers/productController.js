@@ -6,6 +6,9 @@ import path from 'path';
 export const addProduct = async (req, res) => {
     try {
         const productData = JSON.parse(req.body.productData);
+        if (productData.offerPrice === undefined || productData.offerPrice === null || productData.offerPrice === '') {
+            productData.offerPrice = Number(productData.price);
+        }
         const files = req.files || [];
         const images = files.filter((file) => file.fieldname === 'images');
 

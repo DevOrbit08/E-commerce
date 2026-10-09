@@ -15,12 +15,12 @@ const categories = [
 const CategoryBar = () => {
   return (
     <div className="border-t border-b bg-white">
-      <div className="flex gap-6 px-6 md:px-16 lg:px-24 py-3 overflow-x-auto">
+      <div className="no-scrollbar flex gap-4 overflow-x-auto px-4 py-2.5 sm:gap-6 sm:px-6 sm:py-3 md:px-16 lg:px-24">
         {categories.map((cat) => (
           <Link
             key={cat.name}
             to={cat.path}
-            className="whitespace-nowrap text-sm font-medium hover:text-green-600"
+            className="whitespace-nowrap text-xs font-medium hover:text-green-600 sm:text-sm"
           >
             {cat.name}
           </Link>

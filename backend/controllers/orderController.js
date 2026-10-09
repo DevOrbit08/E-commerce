@@ -20,8 +20,6 @@ export const placeOrderCOD = async (req, res) => {
             return (await acc) + product.offerPrice * item.quantity;
         }, 0);
 
-        amount += Math.floor(amount * 0.02); // Tax
-
         const order = await Order.create({
             userId,
             items,
@@ -66,8 +64,6 @@ export const placeOrderStripe = async (req, res) => {
             return (await acc) + product.offerPrice * item.quantity;
         }, 0);
 
-        amount += Math.floor(amount * 0.02); // Tax
-
         const order = await Order.create({
             userId,
             items,
@@ -82,7 +78,7 @@ export const placeOrderStripe = async (req, res) => {
             price_data: {
                 currency: "usd",
                 product_data: { name: item.name },
-                unit_amount: Math.floor(item.price + item.price * 0.02) * 100
+                unit_amount: Math.floor(item.price) * 100
             },
             quantity: item.quantity
         }));
@@ -204,10 +200,76 @@ export const cancelOrder = async (req, res) => {
 // Get all orders (for seller / admin) : /api/order/seller
 export const getAllOrders = async (req, res) => {
     try {
-        const orders = await Order.find({}).populate("items.product address").sort({ createdAt: -1 });
+        const orders = await Order.find({})
+            .populate("items.product address")
+            .populate("deliveredBy", "name phone email")
+            .sort({ createdAt: -1 });
         res.json({ success: true, orders });
     } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message });
+    }
+}
+
+export const getDeliveryPartnerOrders = async (req, res) => {
+    try {
+        const completed = req.query.status === 'completed';
+        const filter = completed
+            ? { status: 'Delivered' }
+            : { status: 'Processing' };
+        const orders = await Order.find(filter)
+            .populate('items.product address')
+            .populate('userId', 'name email phone')
+            .populate('deliveredBy', 'name phone email')
+            .sort({ createdAt: -1 });
+        res.json({ success: true, orders });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export const updateOrderStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { status } = req.body;
+        const isDeliveryPartner = Boolean(req.deliveryPartnerId);
+        const allowedStatus = isDeliveryPartner ? 'Delivered' : 'Processing';
+        const requiredCurrentStatus = isDeliveryPartner ? 'Processing' : 'Order Placed';
+
+        if (status !== allowedStatus) {
+            return res.status(403).json({
+                success: false,
+                message: isDeliveryPartner
+                    ? 'Delivery partners can only mark processing orders as delivered'
+                    : 'Sellers can only move orders to processing',
+            });
+        }
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        if (order.status === status) {
+            return res.json({ success: true, order });
+        }
+        if (order.status !== requiredCurrentStatus) {
+            return res.status(400).json({
+                success: false,
+                message: order.status === 'Cancelled'
+                    ? 'Cancelled orders cannot be updated'
+                    : 'Orders must move through each status in order',
+            });
+        }
+
+        order.status = status;
+        if (isDeliveryPartner) order.deliveredBy = req.deliveryPartnerId;
+        await order.save();
+        await order.populate('deliveredBy', 'name phone email');
+        res.json({ success: true, order });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ success: false, message: error.message });
     }
 }

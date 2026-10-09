@@ -5,17 +5,29 @@ import jwt from 'jsonwebtoken';
 // Register User : /api/user/register
 export const register = async (req, res) => {
     try {
-        const { name, identifier, password } = req.body;
-        if(!name || !identifier || !password){
-            return res.json({success: false, message: 'Missing Details'});
+        const { name, email, phone, password } = req.body;
+        const normalizedName = typeof name === 'string' ? name.trim() : '';
+        const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+        const normalizedPhone = typeof phone === 'string' ? phone.trim() : '';
+        if (!normalizedName || !normalizedEmail || !normalizedPhone || typeof password !== 'string' || !password.trim()) {
+            return res.json({ success: false, message: 'Name, email, phone number, and password are required' });
         }
-        const isEmail = identifier.includes('@');
-        const contact = isEmail ? { email: identifier.trim().toLowerCase() } : { phone: identifier.trim() };
-        const existingUser = await User.findOne(contact);
-        if(existingUser)
-            return res.json({success: false, message: "User Already Exists"});
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+            return res.json({ success: false, message: 'Enter a valid email address' });
+        }
+        const existingUser = await User.findOne({
+            $or: [{ email: normalizedEmail }, { phone: normalizedPhone }],
+        });
+        if (existingUser) {
+            return res.json({ success: false, message: 'Email or phone number is already registered' });
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await User.create({name: name.trim(), ...contact, password: hashedPassword});
+        const user = await User.create({
+            name: normalizedName,
+            email: normalizedEmail,
+            phone: normalizedPhone,
+            password: hashedPassword,
+        });
         
         const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '7d'});
 

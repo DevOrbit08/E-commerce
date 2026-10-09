@@ -18,22 +18,22 @@ const AllProducts = () => {
   }, [products, searchQuery, selectedCategory])
 
   return (
-    <div className='mt-16'>
+    <div className='mt-8 sm:mt-16'>
       <div className='mb-8'>
-        <p className='text-2xl font-medium uppercase md:text-3xl'>
+        <p className='text-xl font-medium uppercase sm:text-2xl md:text-3xl'>
           {selectedCategory === 'All categories' ? 'All Products' : selectedCategory}
         </p>
         <div className='mt-1 h-0.5 w-16 rounded-full bg-primary'></div>
       </div>
 
-      <div className='grid gap-8 lg:grid-cols-[240px_1fr]'>
-        <aside className='h-fit max-h-[calc(100vh-8rem)] overflow-hidden rounded-xl border border-gray-200 bg-white p-4 lg:sticky lg:top-6'>
+      <div className='grid gap-5 lg:grid-cols-[240px_1fr] lg:gap-8'>
+        <aside className='h-fit max-h-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-3 lg:sticky lg:top-6 lg:max-h-[calc(100vh-8rem)] lg:p-4'>
           <div className='mb-3 flex items-center justify-between'>
             <h2 className='font-semibold text-primary'>Categories</h2>
             <span className='text-xs text-primary'>⌃</span>
           </div>
           <div
-            className='category-list-scroll max-h-[calc(100vh-13rem)] space-y-1 overflow-y-auto rounded-lg bg-orange-50 p-2 pr-1'
+            className='category-list-scroll max-h-44 space-y-1 overflow-y-auto rounded-lg bg-orange-50 p-2 pr-1 lg:max-h-[calc(100vh-13rem)]'
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             <button
@@ -66,11 +66,6 @@ const AllProducts = () => {
         </aside>
 
         <section>
-          <div className='mb-4 flex items-center justify-between'>
-            <p className='text-sm text-gray-500'>
-              Showing {filteredProducts.length} product{filteredProducts.length === 1 ? '' : 's'}
-            </p>
-          </div>
           <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5 xl:grid-cols-4 2xl:grid-cols-5'>
             {filteredProducts.map((product) => (
               <ProductCard key={product._id} product={product} />
